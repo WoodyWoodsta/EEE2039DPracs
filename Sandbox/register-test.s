@@ -1,5 +1,3 @@
-; Just a test to see what basic instrunctions do
-
   .syntax unified
   .cpu cortex-m0
   .thumb
@@ -8,7 +6,6 @@
   .word 0x20001FFF
   .word _start + 1
 
-_start: LDR R1, #4
+_start: MOVS R0, #0x42
+    MOVS R1, #0x69
 
-loop:
-  B loop
