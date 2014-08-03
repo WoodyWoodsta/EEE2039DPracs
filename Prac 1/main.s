@@ -39,23 +39,13 @@ copy_to_RAM_complete:
   MULS R1, R1, R2
   STR R1, [R0, #28]
 
-  LDR R0, PORTB_START
-  LDR R1, PORT_MODE1
-  LDR R4, [R0, #32]
-  ORRS R1, [R0, #0]
-  LDR R1, PORT_OUTPUT1
-  STR R1, [R0, 0x14]
-
-
 infinite_loop:
   B infinite_loop
 
   .align
 RAM_START: .word 0x20000000
-PORTB_START: .word 0x48000400
 A: .word 0xAABBCCDD
 B: .word 0x00001122
 C: .word 0x00002233
 D: .word 0x55555555
-PORT_MODE1: .word 0b1010101010101010
-PORT_OUTPUT1: .word 0b111
+
