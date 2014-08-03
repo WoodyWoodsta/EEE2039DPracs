@@ -8,4 +8,5 @@
 
 _start: MOVS R0, #0x42
     MOVS R1, #0x69
+	ADDS R3, R1, R0
 
