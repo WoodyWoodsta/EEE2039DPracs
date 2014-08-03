@@ -17,8 +17,12 @@ _start:
   LDR R1, D
   STR R1, [R0, #12]
 
-
 @copy_to_RAM_complete:
+  LDR R1, [R0]
+  LDR R2, [R0, #4]
+  SUBS R1, R1, R2
+
+
 @infinite_loop:
 
   .align
