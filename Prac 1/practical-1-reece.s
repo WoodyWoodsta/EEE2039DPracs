@@ -25,7 +25,27 @@ _start:
 
 @copy_to_RAM_complete:
 
+	LDR R1, [R0]
+	LDR R2, [R0, #4]
+	SUBS R1, R1, R2
+	STR R1, [R0, #16]
 	
+	LDR R1, [R0]
+	LDR R2, [R0, #4]
+	ADDS R1, R1, R2
+	LDR R2, [R0, #8]
+	ADDS R1, R1, R2
+	STR R1, [R0, #20]
+	
+	LDR R1, [R0, #4]
+	LDR R2, [R0, #8]
+	EORS R1, R1, R2
+	STR R1, [R0, #24]
+	
+	LDR R1, [R0, #4]
+	LDR R2, [R0, #8]
+	MULS R1, R1, R2
+	STR R1, [R0, #28]
 	
 
 @infinte loop:
