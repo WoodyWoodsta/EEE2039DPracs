@@ -1,6 +1,6 @@
 
-; This is a simple assembly code template for programming
-; the STM32F051C6 MCU :)
+@This is a simple assembly code template for programming
+@the STM32F051C6 MCU :)
 
   .syntax unified
   .cpu cortex-m0
