@@ -45,13 +45,11 @@ copy_to_RAM_complete:
   ORRS R1, R1, R2                  @OR values for RCC_AHBENR register
   STR R1, [R0, #20]                @Reload RCC_AHBENR register
   LDR R0, PORTB_START              @Specify start of GPIOB register addresses
-@ LDR R3, [R0]                     @Just check what is in here
   LDR R1, PORT_MODE1               @Specify output mode to Digital Output (01)
   STR R1, [R0]                     @Set output mode of GPIOB
-@ LDR R4, [R0, 0x14]               @Just check what is in there
-  LDR R1, PORT_OUTPUT1             @Specifiy data
+  LDR R5, RAM_START
+  LDR R1, [R5, #16]                @Load data from 0x20000010
   STR R1, [R0, #20]                @Write data
-
 
 infinite_loop:
   B infinite_loop
@@ -66,4 +64,3 @@ D: .word 0x55555555
 RCC_START: .word 0x40021000
 RCC_AHBENR_GPIOBEN: .word 0x00040000
 PORT_MODE1: .word 0x00005555
-PORT_OUTPUT1: .word 0b11
