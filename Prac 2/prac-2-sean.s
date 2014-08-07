@@ -16,7 +16,11 @@ _start:
   LDR R1, PORTB_MODEROUT
   STR R1, [R0]
 
+_all_off:                                       @Turn all LEDs off
+  LDR R1, 0x0
+  STR R1, [R0, 0x14]
 
+  
 
   .align
 RCC_START: .word 0x40021000
