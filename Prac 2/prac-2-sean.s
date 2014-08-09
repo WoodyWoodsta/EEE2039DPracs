@@ -9,8 +9,8 @@
   .word _start + 1
 
 _start:
-  LDR R0, RCC_START                             @Enable PORT B
-  LDR R1, RCC_AHBENR_GPIOBEN
+  LDR R0, RCC_START                             @Enable PORT A and B
+  LDR R1, RCC_AHBENR_GPIO_AB_EN
   LDR R2, [R0, #20]
   ORRS R1, R1, R2
   STR R1, [R0, #20]
@@ -31,6 +31,12 @@ all_on:
   STR R1, [R0, 0x14]
 
 bonus:
+  LDR R4, PORTA_START
+  LDR R5, [R4, 0x10]
+  MOVS R1, 0x0
+  ADDS R1, R5, R1
+  STR R1, [R0, 0x14]
+  B bonus
 
 
 end:
@@ -39,6 +45,7 @@ end:
 
   .align
 RCC_START: .word 0x40021000
-RCC_AHBENR_GPIOBEN: .word 0x00040000
+RCC_AHBENR_GPIO_AB_EN: .word 0x00060000
 PORTB_START: .word 0x48000400
+PORTA_START: .word 0x48000000
 PORTB_MODEROUT: .word 0x00005555
