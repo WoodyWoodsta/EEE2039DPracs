@@ -29,23 +29,38 @@ display_AA:
 all_on:
   MOVS R1, 0b11111111                           @Turn all LEDs on
   STR R1, [R0, 0x14]
-
-bonus_init:
+@------bonus_init------
   LDR R1, PORTA_START
-  LDR R2, PORTA_PUPDR            @Pullup mode for PA0-3
+  LDR R2, PORTA_PUPDR                           @Pullup mode for PA0-3
   LDR R3, [R1, 0x0C]
   ORRS R2, R2, R3
   STR R2, [R1, 0x0C]
-  LDR R2, PORTA_MODERIN          @Input mode for PA0-3 and output for the rest  
-  LDR R3, [R1]
-  ORRS R2, R2, R3
+  LDR R2, PORTA_MODERIN                         @Input mode for PA0-3 and output for the rest  
+@  LDR R3, [R1]
+@  ORRS R2, R2, R3
   STR R2, [R1]
+
+@bonus_init:
+@  LDR R1, PORTA_START
+@  LDR R2, PORTA_PUPDR            @Pullup mode for PA0-3
+@  LDR R3, [R1, 0x0C]
+@  ORRS R2, R2, R3
+@  STR R2, [R1, 0x0C]
+@  LDR R2, PORTA_MODERIN          @Input mode for PA0-3 and output for the rest  
+@  LDR R3, [R1]
+@  ORRS R2, R2, R3
+@  STR R2, [R1]
 
 bonus:                    @Take GPIOA_IDR and display it
   LDR R2, [R1, 0x10]
-  MOVS R3, 0x0
-  ADDS R2, R2, R3
-  STR R2, [R0, 0x14]
+  MOVS R3, 0x1            @Isolate last bit from GPIOA_IDR
+  ANDS R2, R2, R3
+  EORS R2, R2, R3
+  CMP R2, #0
+  BEQ all_off
+@  ADDS R2, R2, R3
+  MOVS R4, 0x55
+  STR R4, [R0, 0x14]
   B bonus
 
 
@@ -59,5 +74,5 @@ RCC_AHBENR_GPIO_AB_EN: .word 0x00060000
 PORTB_START: .word 0x48000400
 PORTA_START: .word 0x48000000
 PORTB_MODEROUT: .word 0x00005555
-PORTA_MODERIN: .word 0x5500
+PORTA_MODERIN: .word 0x28000000
 PORTA_PUPDR: .word 0x55
