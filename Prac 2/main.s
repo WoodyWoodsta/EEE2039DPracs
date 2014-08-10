@@ -17,9 +17,16 @@ _start:
   LDR R0, PORTB_START                     @Set PORT B to Output
   LDR R1, PORTB_MODEROUT
   STR R1, [R0]
+  LDR R6, PORTA_START
+  LDR R2, PORTA_PUPDR                     @Pullup mode for PA0-3
+  LDR R3, [R6, 0x0C]
+  ORRS R2, R2, R3
+  STR R2, [R6, 0x0C]
+  LDR R2, PORTA_MODERIN                   @Input mode for PA0-3 and output for the rest  
+  STR R2, [R6]
 
 all_off:                                  @Turn all LEDs off
-  MOVS R1, 0b00000000
+  MOVS R1, 0x0
   STR R1, [R0, 0x14]
 
 display_AA:
@@ -29,17 +36,9 @@ display_AA:
 all_on:
   MOVS R1, 0b11111111                     @Turn all LEDs on
   STR R1, [R0, 0x14]
-@------bonus_init------                   @Initiating here because it wastes cycles per time in bonus
-  LDR R1, PORTA_START
-  LDR R2, PORTA_PUPDR                     @Pullup mode for PA0-3
-  LDR R3, [R1, 0x0C]
-  ORRS R2, R2, R3
-  STR R2, [R1, 0x0C]
-  LDR R2, PORTA_MODERIN                   @Input mode for PA0-3 and output for the rest  
-  STR R2, [R1]
 
 bonus:                                    @Take GPIOA_IDR and display it
-  LDR R2, [R1, 0x10]
+  LDR R2, [R6, 0x10]
   MOVS R3, 0x1                            @Isolate last bit from GPIOA_IDR
   ANDS R2, R2, R3
   EORS R2, R2, R3                         @Get actual value (pullup resistor not doing us any favour)
