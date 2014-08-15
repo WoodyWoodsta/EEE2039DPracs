@@ -26,53 +26,72 @@ _start:
   LDR R2, PORTA_MODERIN
   ORRS R1, R1, R2
   STR R1, [R0]
-  LDR R3, RAM_START
-  B flashAA
+  MOVS R3, #0
+
+s0Sel:
+  LDR R7, [R0, 0x10]
+  LDR R2, =0x1
+  ANDS R7, R7, R2                                                @Selecting S1 Data
+  B router1
 
 delayInit:
   LDR R5, =0x0                                                    @R8 is the delay counter
+  LDR R2, =0x1
+  EORS R3, R3, R2
 
 delay:
   ADDS R5, #1
   CMP R5, R6                                                      @R9 is the delay indicator
   BNE delay
-  B router
+  BEQ s0Sel
 
-buttonSel:
+s1Sel:
   LDR R1, [R0, 0x10]
-  ANDS R1, R1, =0x2                                                @Selecting S1 Data
+  LDR R2, =0x2
+  ANDS R1, R1, R2                                                @Selecting S1 Data
   LSRS R1, #1
-  LDR R6, DELAY_FAST
-  MULS R6, R1, R6                                        @Checking for timing decision
-  EORS R1, R1, #1
   LDR R6, DELAY_SLOW
-  MULS R6, R1, R6
+  CMP R1, #1
+  BEQ delayInit
+  LDR R2, =0x1
+  EORS R1, R1, R2
+  LDR R6, DELAY_FAST
   B delayInit
 
-router:
-  CMP R7, #1
-  BEQ buttonSel
-  CMP R7, #2
+router1:                                                           @S0 - R7, S1 - R3
+  CMP R7, #0
+  BEQ router2
+  CMP R3, #1
   BEQ flash55
-  CMP R7, #3
-  BEQ flashAA
-  CMP R7, #4
-  BEQ flash55
+  B flashAA
 
+router2:
+  CMP R3, #1
+  BEQ flashALL
+  B flashNONE
 
-flashAA:                   @------------- SUBROUTINE TYPE #2 -------------
-  LDR R7, #1
+flashAA:                    @------------- SUBROUTINE #1 -------------
   LDR R5, =0xAA
   STR R5, [R4, 0x14]
-  B delayInit
+  B s1Sel
 
-flash55:                   @------------- SUBROUTINE #3 -------------
-  LDR R7, #1
+flash55:                    @------------- SUBROUTINE #1 -------------
   LDR R5, =0x55
   STR R5, [R4, 0x14]
-  B delayInit
+  B s1Sel
+
+flashALL:                   @------------- SUBROUTINE #2 -------------
+  LDR R5, =0xFF
+  STR R5, [R4, 0x14]
+  B s1Sel
+
+flashNONE:                  @------------- SUBROUTINE #2 -------------
+  LDR R5, =0x0
+  STR R5, [R4, 0x14]
+  B s1Sel
 
   .align
+
 RCC_START: .word 0x40021000
 RCC_AHBENR_GPIO_AB_EN: .word 0x00060000
 PORTA_START: .word 0x48000000
@@ -81,5 +100,5 @@ PORTA_PUPDR: .word 0x55
 PORTB_START: .word 0x48000400
 PORTB_MODEROUT: .word 0x00005555
 RAM_START: .word 0x20000000
-DELAY_FAST: .word 0x7FFF
-DELAY_SLOW: .word 0xFFFF
+DELAY_FAST: .word 0x7FFFF
+DELAY_SLOW: .word 0xFFFFF
