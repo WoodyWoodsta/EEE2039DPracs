@@ -27,7 +27,7 @@ _start:
   ORRS R1, R1, R2
   STR R1, [R0]
   LDR R3, RAM_START
-  B ledflash
+  B flashAA
 
 delayInit:
   LDR R5, =0x0                                                    @R8 is the delay counter
@@ -36,21 +36,41 @@ delay:
   ADDS R5, #1
   CMP R5, R6                                                      @R9 is the delay indicator
   BNE delay
+  B router
 
-router:
-  LDR R6, [R3]
-  CMP R6, #1
-  BEQ correct
-
-ledflash:
-  MOVS R6, #1
-  STR R6, [R3]
-  LDR R6, =0x5
+buttonSel:
+  LDR R1, [R0, 0x10]
+  ANDS R1, R1, =0x2                                                @Selecting S1 Data
+  LSRS R1, #1
+  LDR R6, DELAY_FAST
+  MULS R6, R1, R6                                        @Checking for timing decision
+  EORS R1, R1, #1
+  LDR R6, DELAY_SLOW
+  MULS R6, R1, R6
   B delayInit
 
-correct:
-  LDR R5, =0b111
+router:
+  CMP R7, #1
+  BEQ buttonSel
+  CMP R7, #2
+  BEQ flash55
+  CMP R7, #3
+  BEQ flashAA
+  CMP R7, #4
+  BEQ flash55
+
+
+flashAA:                   @------------- SUBROUTINE TYPE #2 -------------
+  LDR R7, #1
+  LDR R5, =0xAA
   STR R5, [R4, 0x14]
+  B delayInit
+
+flash55:                   @------------- SUBROUTINE #3 -------------
+  LDR R7, #1
+  LDR R5, =0x55
+  STR R5, [R4, 0x14]
+  B delayInit
 
   .align
 RCC_START: .word 0x40021000
@@ -61,3 +81,5 @@ PORTA_PUPDR: .word 0x55
 PORTB_START: .word 0x48000400
 PORTB_MODEROUT: .word 0x00005555
 RAM_START: .word 0x20000000
+DELAY_FAST: .word 0x7FFF
+DELAY_SLOW: .word 0xFFFF
