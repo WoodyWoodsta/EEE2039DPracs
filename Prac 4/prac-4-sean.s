@@ -29,20 +29,30 @@ _start:
   STR R2, [R1]
 
 Ram_Copy_init:                                                    @Get start of data
-  LDR R2, =Data
-  LDR R3, RAM_START
-  LDR R5, =0x0                                                     @Start loop counter
+  LDR R2, =DATA                                                   @FLASH pointer
+  LDR R3, RAM_START                                               @RAM pointer
+  LDR R5, =DATA_END                                               @Get address of the word after the word of data
+  ADDS R5, #4
 
 Ram_Copy:                                                         @Iterative copy of data to RAM
-  ADDS R5, #1                                                     @Increment loop counter
+@  ADDS R5, #1                                                     @Increment loop counter
   LDR R4, [R2]                                                    @Load FLASH data
   STR R4, [R3]                                                    @Store FLASH data to RAM
   ADDS R2, #4                                                     @Increment RAM and FLASH pointers     |
   ADDS R3, #4                                                     @                                     |
-  CMP R5, 0x2F                                                    @Check for end of loop counter
-  BEQ Ram_Copy
+  CMP R5, R2                                                      @Check for end of data
+  BNE Ram_Copy
 
-copy_to_RAM_complete:
+copy_to_RAM_complete:                                             @Get start of RAM
+  LDR R2, RAM_START
+
+Ram_Incr:                                                         @Increment each bit of stored data in RAM by 1
+  LDR R4, [R3]                                                    @Load byte from RAM
+  ADDS R4, #1                                                     @Increment byte by 1
+  STR R4, [R3]                                                    @Store new value
+  ADDS R2, #1
+  CMP R5, R2                                                      @Check for end of data
+  BNE Ram_Incr
 
   .align
 
@@ -55,10 +65,9 @@ PORTA_PUPDR: .word 0x55
 PORTB_START: .word 0x48000400
 PORTB_MODEROUT: .word 0x00005555
 RAM_START: .word 0x20000000
-DATA_LENGTH: .word 0x2F @PLUS 1!
 
 @ Data
-Data: .word 0x10e865fe
+DATA: .word 0x10e865fe
       .word 0x839b17fb
       .word 0xde6ac773
       .word 0x49a0392b
@@ -103,4 +112,4 @@ Data: .word 0x10e865fe
       .word 0xca09fbe7
       .word 0x45ec4e32
       .word 0xa11ccfb5
-      .word 0x95584228
+DATA_END: .word 0x95584228
