@@ -14,45 +14,84 @@ _start:
   LDR R3, RCC_AHBENR_GPIO_AB_EN
   ORRS R2, R2, R3
   STR R2, [R0, 0x14]
-  LDR R0, PORTA_START                                             @Load base address for Ports A and B  |
-  LDR R1, PORTB_START                                             @PORT A - [R0], PORT B - [R1]         |
-  LDR R7, RAM_START                                               @Load base address of RAM
-  LDR R2, [R0, 0xC] 
-  LDR R3, PORTA_PUPDR                                             @Enable Port A pullup resistors
-  ORRS R2, R2, R3
-  STR R2, [R0, 0xC]
-  LDR R2, [R0]                                                    @Set Port A Mode to IN
-  LDR R3, PORTA_MODERIN
-  ORRS R2, R2, R3
-  STR R2, [R0]
-  LDR R2, PORTB_MODEROUT                                          @Set Port B Mode to OUT
-  STR R2, [R1]
+@  LDR R0, PORTA_START                                             @Load base address for Ports A and B  |
+@  LDR R1, PORTB_START                                             @PORT A - [R0], PORT B - [R1]         |
+@  LDR R2, [R0, 0xC] 
+@  LDR R3, PORTA_PUPDR                                             @Enable Port A pullup resistors
+@  ORRS R2, R2, R3
+@  STR R2, [R0, 0xC]
+@  LDR R2, [R0]                                                    @Set Port A Mode to IN
+@  LDR R3, PORTA_MODERIN
+@  ORRS R2, R2, R3
+@  STR R2, [R0]
+@  LDR R2, PORTB_MODEROUT                                          @Set Port B Mode to OUT
+@  STR R2, [R1]
 
-Ram_Copy_init:                                                    @Get start of data
+ram_Copy_init:                                                    @Get start of data
   LDR R2, =DATA                                                   @FLASH pointer
   LDR R3, RAM_START                                               @RAM pointer
   LDR R5, =DATA_END                                               @Get address of the word after the word of data
   ADDS R5, #4
 
-Ram_Copy:                                                         @Iterative copy of data to RAM
-@  ADDS R5, #1                                                     @Increment loop counter
+ram_Copy:                                                         @Iterative copy of data to RAM
   LDR R4, [R2]                                                    @Load FLASH data
   STR R4, [R3]                                                    @Store FLASH data to RAM
   ADDS R2, #4                                                     @Increment RAM and FLASH pointers     |
   ADDS R3, #4                                                     @                                     |
   CMP R5, R2                                                      @Check for end of data
-  BNE Ram_Copy
+  BNE ram_Copy
 
 copy_to_RAM_complete:                                             @Get start of RAM
+  MOVS R7, R3                                                     @Relocate the end of data (RAM)
   LDR R3, RAM_START
+  LDR R5, =DATA_END                                               @Get address of the word after the last word of data
 
-Ram_Incr:                                                         @Increment each bit of stored data in RAM by 1
-  LDR R4, [R3]                                                    @Load byte from RAM
-  ADDS R4, #1                                                     @Increment byte by 1
-  STR R4, [R3]                                                    @Store new value
-  ADDS R3, #1
-  CMP R5, R3                                                      @Check for end of data
-  BNE Ram_Incr
+byte_Incr:                                                        @Increment each byte by 1
+  LDRB R4, [R3]                                                   @Load the byte
+  ADDS R4, #1                                                     @Increment by 1
+  STRB R4, [R3]                                                   @Store the byte
+  ADDS R3, #1                                                     @Increment RAM pointer
+  CMP R3, R7
+  BNE byte_Incr
+
+increment_RAM_complete:
+
+@Ram_Incr:                                                         @Increment each bit of stored data in RAM by 1
+@  LDR R4, [R3]                                                    @Load byte from RAM
+@  LDR R5, =0x01010101                                             @Increment 4 bytes in the selected word simultaneously
+@  ADDS R4, R5
+@  STR R4, [R3]
+@  ADDS R3, #4                                                     @Increment RAM pointer
+@  CMP R5, R3                                                      @Check for end of data
+@  BNE Ram_Incr
+
+@  ADDS R5, #3
+@  SUBS R3, #4
+@  LDR R1, =0xFF
+@
+@ram_Load:                                                         @Increment each bit of stored data in RAM by 1
+@  ADDS R3, #7
+@  CMP R5, R3                                                      @Check for end of data
+@  BEQ increment_RAM_complete
+@  LDR R7, =0x0                                                    @Using R7 as a "word buffer"
+@  LDR R6, =0x3
+@
+@byte_Incr:
+@  LDR R4, [R3]                                                    @Load byte from RAM
+@  ANDS R4, R4, R1
+@  ADDS R4, #1
+@  ADDS R7, R4
+@  LSLS R7, #8
+@  CMP R6, #0
+@  BEQ ram_Store
+@  SUBS R6, #1
+@  SUBS R3, #1                                                     @Increment RAM pointer
+@  B byte_Incr
+@
+@ram_Store:
+@  STR R7, [R3]
+@  B ram_Load
+
 
   .align
 
