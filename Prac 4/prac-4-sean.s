@@ -44,14 +44,14 @@ Ram_Copy:                                                         @Iterative cop
   BNE Ram_Copy
 
 copy_to_RAM_complete:                                             @Get start of RAM
-  LDR R2, RAM_START
+  LDR R3, RAM_START
 
 Ram_Incr:                                                         @Increment each bit of stored data in RAM by 1
   LDR R4, [R3]                                                    @Load byte from RAM
   ADDS R4, #1                                                     @Increment byte by 1
   STR R4, [R3]                                                    @Store new value
-  ADDS R2, #1
-  CMP R5, R2                                                      @Check for end of data
+  ADDS R3, #1
+  CMP R5, R3                                                      @Check for end of data
   BNE Ram_Incr
 
   .align
