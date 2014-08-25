@@ -31,23 +31,33 @@ ram_Copy:                                                         @Iterative cop
 
 copy_to_RAM_complete:                                             @Get start of RAM
   MOVS R7, R3                                                     @Relocate the end of data (RAM)
-  SUBS R7, #3
   LDR R3, RAM_START
   LDR R0, =0xFF                                                   @Use R0 as holder of the smallest byte
   LDR R1, =0x0                                                    @Use R1 as holder of the largest byte
 
 byte_Incr:                                                        @Increment each byte by 1 and check for the conditions
-  LDRB R4, [R3]                                                   @Load the byte
-  ADDS R4, #1                                                     @Increment by 1
-  ADDS R6, #1                                                     @Increment by 1
+  LDRB R4, [R3]                                                   @Load the unsigned byte
+  ADDS R4, #1                                                     @Increment by 1                       |
   STRB R4, [R3]                                                   @Store the byte
   ADDS R3, #1                                                     @Increment RAM pointer
   BL smallest_Check
   BL largest_Check
+  CMP R3, R7
+  BEQ signed_Check
+  B byte_Incr
+
+signed_Check:                                             @Get start of RAM
+  LDR R3, RAM_START
+  LDR R2, =0b11111111                                                    @Use R1 as holder of the largest byte
+  LDR R6, =0x0
+
+signed_Byte_Incr_Check:                                                        @Check for the conditions
+  LDRSB R4, [R3, R6]                                                   @Load the unsigned byte
   BL largest_Signed_Check
+  ADDS R3, #1                                                     @Increment RAM pointer
   CMP R3, R7
   BEQ increment_of_bytes_complete
-  B byte_Incr
+  B signed_Byte_Incr_Check
 
 smallest_Check:
   CMP R0, R4
@@ -67,19 +77,19 @@ largest_Store:
   MOVS R1, R4
   BX LR
 
-@largest_Signed_Check:
-@  CMP R2, R4
-@  BMI largest_Store
-@  BX LR
-@
-@largest_Signed_Store:
-@  MOVS R2, R4
-@  BX LR
+largest_Signed_Check:
+  CMP R2, R4
+  BGT largest_Signed_Store
+  BX LR
 
+largest_Signed_Store:
+  MOVS R2, R4
+  BX LR
 
 increment_of_bytes_complete:
-  MOVS R5, R0                                                     @Relocate the smallest byte 
-  MOVS R6, R1                                                     @Relocate the largest byte
+  MOVS R4, R0                                                     @Relocate the smallest byte 
+  MOVS R5, R1                                                     @Relocate the largest byte
+  MOVS R6, R2                                                     @Relocate the largest signed byte
   LDR R0, PORTA_START                                             @Load base address for Ports A and B  |
   LDR R1, PORTB_START                                             @PORT A - [R0], PORT B - [R1]         |
   LDR R2, [R0, 0xC] 
@@ -102,15 +112,20 @@ sw_Check:
   BEQ display_Max
   CMP R2, #1
   BEQ display_Min
+  CMP R2, #2
+  BEQ display_MaxS
 
 display_Max:
-  STR R6, [R1, 0x14]
-  B sw_Check
-
-display_Min:
   STR R5, [R1, 0x14]
   B sw_Check
 
+display_Min:
+  STR R4, [R1, 0x14]
+  B sw_Check
+
+display_MaxS:
+  STRB R6, [R1, 0x14]
+  B sw_Check
 
   .align
 
@@ -176,3 +191,6 @@ DATA:   .word 0x22f65244
         .word 0xa11ccfb5
         .word 0x95584228
 DATA_END:
+
+@DATA:   .word 0b00000010000000100000001000000001
+@DATA_END:
