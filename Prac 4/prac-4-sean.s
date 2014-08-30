@@ -48,7 +48,7 @@ byte_Incr:                                                        @Increment eac
 
 signed_Check:                                             @Get start of RAM
   LDR R3, RAM_START
-  LDR R2, =0x1                                                    @Use R1 as holder of the largest byte
+  LDR R2, =0b1111111                                                    @Use R1 as holder of the largest byte
   LDR R6, =0x0
 
 signed_Byte_Incr_Check:                                                        @Check for the conditions
