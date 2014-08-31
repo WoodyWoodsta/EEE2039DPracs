@@ -137,7 +137,7 @@ display_Temp2:
   STR R3, [R1, 0x14]
   B sw_Check
 
-iic_Init_A:
+iic_Init_A: @Basically to "clockout" unwanted data at this stage
   @Enable PORT F RCC Clock
   LDR R0, RCC_START
   LDR R1, RCC_AHBENR_GPIO_FEN
@@ -188,15 +188,15 @@ slave_Clockout_B2:
 
 
 iic_Init_B:
-  @Enable PORT F RCC Clock
-  LDR R0, RCC_START
-  LDR R1, RCC_AHBENR_GPIO_FEN
-  LDR R2, [R0, 0x14]
-  ORRS R2, R2, R1
-  STR R2, [R0, 0x14]
-
-  @Set SCLK (PORT F, Pin 6) mode to ALTERNATE FUNCTION
+  @Reset PORT F mode bits
   LDR R0, PORTF_START
+  LDR R1, GPIO_MODER_MODER6
+  LDR R2, =0xFFFFFFFF
+  EORS R1, R1, R2
+  LDR R2, [R0]
+  ANDS R2, R2, R1
+  STR R2, [R0]
+  @Set SCLK (PORT F, Pin 6) mode to ALTERNATE FUNCTION
   LDR R1, GPIO_MODER_MODER6_1
   LDR R2, [R0]
   ORRS R2, R2, R1
@@ -228,7 +228,7 @@ iic_Init_B:
   @Disable I2C Peripheral (Using control register 1)
   LDR R0, I2C2_START
   LDR R1, I2C_CR1_PE
-  LDR R3, =0x1
+  LDR R3, =0xFFFFFFFF
   EORS R1, R1, R3
   LDR R2, [R0]
   ANDS R2, R2, R1
@@ -319,39 +319,40 @@ wait_TC: @Wait for ACK and TC Flag
   LDR R7, I2C_ISR_RXNE
   ANDS R7, R7, R3
   CMP R7, #0
-  BNE wait_TC
+  BEQ wait_TC
   BX LR
 
 
   .align
 
 @ Program Variables
-RCC_START: .word 0x40021000
-RCC_AHBENR_GPIO_ABEN: .word 0x00060000
-RCC_AHBENR_GPIO_FEN: .word 0x00400000
-RCC_APB1ENR_I2C2EN: .word 0x00400000
-PORTA_START: .word 0x48000000
-PORTA_MODERIN: .word 0x28000000
-PORTA_PUPDR: .word 0x55
-PORTB_START: .word 0x48000400
-PORTB_MODEROUT: .word 0x00005555
-PORTF_START: .word 0x48001400
-GPIO_MODER_MODER6_0: .word 0x00001000
-GPIO_MODER_MODER6_1: .word 0x00002000
-GPIO_OTYPER_OT_6: .word 0x00000040
-GPIO_MODER_MODER7_1: .word 0x00008000
-GPIO_OTYPER_OT_7: .word 0x00000080
-I2C2_START: .word 0x40005800
-I2C_CR1_PE: .word 0x00000001
-TC74ADDR_READ: .word 0b10010001
-TC74ADDR_WRITE: .word 0b10010000
-I2C_CR2_RD_WRN: .word 0x00000400
-I2C_CR2_START: .word 0x00002000
-I2C_ISR_RXNE: .word 0x00000004
-I2C_CR2_STOP: .word 0x00004000
-GPIO_BSRR_BR_6: .word 0x00400000
-GPIO_BSRR_BS_6: .word 0x00000040
-RAM_START: .word 0x20000000
+RCC_START:              .word 0x40021000
+RCC_AHBENR_GPIO_ABEN:   .word 0x00060000
+RCC_AHBENR_GPIO_FEN:    .word 0x00400000
+RCC_APB1ENR_I2C2EN:     .word 0x00400000
+PORTA_START:            .word 0x48000000
+PORTA_MODERIN:          .word 0x28000000
+PORTA_PUPDR:            .word 0x55
+PORTB_START:            .word 0x48000400
+PORTB_MODEROUT:         .word 0x00005555
+PORTF_START:            .word 0x48001400
+GPIO_MODER_MODER6:      .word 0x00003000
+GPIO_MODER_MODER6_0:    .word 0x00001000
+GPIO_MODER_MODER6_1:    .word 0x00002000
+GPIO_OTYPER_OT_6:       .word 0x00000040
+GPIO_MODER_MODER7_1:    .word 0x00008000
+GPIO_OTYPER_OT_7:       .word 0x00000080
+GPIO_BSRR_BR_6:         .word 0x00400000
+GPIO_BSRR_BS_6:         .word 0x00000040
+I2C2_START:             .word 0x40005800
+I2C_CR1_PE:             .word 0x00000001
+TC74ADDR_READ:          .word 0b10010001
+TC74ADDR_WRITE:         .word 0b10010000
+I2C_CR2_RD_WRN:         .word 0x00000400
+I2C_CR2_START:          .word 0x00002000
+I2C_ISR_RXNE:           .word 0x00000004
+I2C_CR2_STOP:           .word 0x00004000
+RAM_START:              .word 0x20000000
 
 @ Data
 DATA:   .word 0x22f65244
