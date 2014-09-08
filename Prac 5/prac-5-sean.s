@@ -22,7 +22,19 @@ Default_Handler:                                            @== Executed in the 
 
 _start:
   BL LEDInit                                                @ Enable the LEDs (Also enables the RCC clock for GPIOA, too lazy to omit)
+  LDR R4, =0x0
+  LDR R5, =0x0
+  @ PUSH 0b101
+  @ PUSH 0b010                                                @ Push first two numbers
+  LDR R4, [SP]
+  LDR R5, [SP]
 
+test:
+  STR R4, [R0, 0x14]
+  BL delay
+  STR R5, [R0, 0x14]
+  BL delay
+  B test
 
 initialisations_complete:                                   @== New data loaded at 0x20000000
 
@@ -39,6 +51,13 @@ LEDInit:
   LDR R0, PORTB_START
   LDR R2, PORTB_MODEROUT                                    @ Set Port B Mode to OUTPUT
   STR R2, [R0]
+  BX LR`
+
+delay:
+  LDR R7, DELAY_1
+  SUBS R7, #1
+  CMP R7, #0
+  BNE delay
   BX LR
 
   .align
@@ -50,6 +69,9 @@ PORTA_MODERIN:          .word 0x28000000
 PORTA_PUPDR:            .word 0x55
 PORTB_START:            .word 0x48000400
 PORTB_MODEROUT:         .word 0x00005555
+STACK_1_START:          .word 0x20002000
+DELAY_1:                .word 0x00090000
+
 
 @== Data 
      Experimental_Data: .word 0x00000001
