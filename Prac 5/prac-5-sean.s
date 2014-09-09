@@ -96,14 +96,14 @@ LEDInit:
   STR R2, [R0]
   BX LR
 
-delay_routine:
+delay_routine:                                              @== Fixed delay subroutine init (total cycles = 5)
   LDR R7, DELAY_1
   B delay_b
 
-delay_b:
-  SUBS R7, #1
-  CMP R7, #0
-  BNE delay_b
+delay_b:                                                    @== Fixed delay subroutine (total cycles = 5)
+  SUBS R7, #1 @ 1
+  CMP R7, #0 @ 1
+  BNE delay_b @ 3
   BX LR
 
   .align
@@ -116,7 +116,7 @@ PORTA_PUPDR:            .word 0x55
 PORTB_START:            .word 0x48000400
 PORTB_MODEROUT:         .word 0x00005555
 STACK_1_START:          .word 0x20002000
-DELAY_1:                .word 0x00010000
+DELAY_1:                .word 0x000C3500
 RAM_START:              .word 0x20000000
 
 
