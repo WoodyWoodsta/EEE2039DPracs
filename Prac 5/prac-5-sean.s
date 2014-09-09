@@ -26,22 +26,33 @@ Default_Handler:                                            @== Executed in the 
 
 _start:
   BL LEDInit                                                @ Enable the LEDs (Also enables the RCC clock for GPIOA, too lazy to omit)
+  LDR R0, PORTB_START
   LDR R1, =0x1                                              @ Pushing the 1st two numbers to the stack
   LDR R2, =0x1
   PUSH {R1, R2}
+  LDR R4, =0x48000414                                       @ Temp address for testing of part two
+  LDR R5, RAM_START
+  STR R4, [R5]
 
 initialisations_complete:                                   @== New data loaded at 0x20000000
   LDR R6, =0x2D                                             @ Start the counter to loop fib_loop 45 times
-
+                                                            @ (This will give us 47 Fibonacci numbers :) )
 fib_loop:
- POP {R1, R2}
- ADDS R1, R1, R2
- PUSH {R1}
- SUBS R6, #1
- CMP R6, #0
+ POP {R2}                                                   @ Pop the last two values from the stack
+ POP {R1}
+ ADDS R3, R1, R2                                            @ Add those values
+ PUSH {R1}                                                  @ Push the three values back onto the stack (in the correct order)
+ PUSH {R2}
+ PUSH {R3}
+ SUBS R6, #1                                                @ Decrement the counter
+ CMP R6, #0                                                 @ Check for end of fib stuff
  BNE fib_loop
 
-fib_calc_complete:
+fib_calc_complete:                                          @== Relocation of the 47th fib number
+  POP {R1}                                                  @ Grab the last word in the stack (the 47th fib number)
+  LDR R0, RAM_START
+  LDR R2, [R0]                                              @ Grab the data which is the address needed
+  STR R1, [R2]                                              @ Store the fib number into that address
 
 cycle_patterns:
   LDR R0, PORTB_START
@@ -105,7 +116,8 @@ PORTA_PUPDR:            .word 0x55
 PORTB_START:            .word 0x48000400
 PORTB_MODEROUT:         .word 0x00005555
 STACK_1_START:          .word 0x20002000
-DELAY_1:                .word 0x00020000
+DELAY_1:                .word 0x00010000
+RAM_START:              .word 0x20000000
 
 
 @== Data 
