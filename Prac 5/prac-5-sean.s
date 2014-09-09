@@ -53,37 +53,44 @@ fib_calc_complete:                                          @== Relocation of th
   LDR R0, RAM_START
   LDR R2, [R0]                                              @ Grab the data which is the address needed
   STR R1, [R2]                                              @ Store the fib number into that address
+  BL pot_poll_init
+@TEST PURPOSES
+  B pot_check
 
-cycle_patterns:
+cycle_patterns:                                             @== Pattern cycler using link branches
   LDR R0, PORTB_START
   LDR R1, =0x0
   STR R1, [R0, 0x14]
-  BL delay_routine
+  BL delay_routine_init
   LDR R1, =0x81
   STR R1, [R0, 0x14]
-  BL delay_routine
+  BL delay_routine_init
   LDR R1, =0xC3
   STR R1, [R0, 0x14]
-  BL delay_routine
+  BL delay_routine_init
   LDR R1, =0xE7
   STR R1, [R0, 0x14]
-  BL delay_routine
+  BL delay_routine_init
   LDR R1, =0xFF
   STR R1, [R0, 0x14]
-  BL delay_routine
+  BL delay_routine_init
   LDR R1, =0x7E
   STR R1, [R0, 0x14]
-  BL delay_routine
+  BL delay_routine_init
   LDR R1, =0x3C
   STR R1, [R0, 0x14]
-  BL delay_routine
+  BL delay_routine_init
   LDR R1, =0x18
   STR R1, [R0, 0x14]
-  BL delay_routine
+  BL delay_routine_init
   B cycle_patterns
 
+pot_check:
+  BL pot_get
+  STR R7, [R0, 0x14]
+  B pot_check
 
-@== Common or lame routines to be called
+@== Subroutines
 
 LEDInit:
   LDR R0, RCC_START                                         @ Enable GPIOA and GPIOB RCC Clock
@@ -96,14 +103,80 @@ LEDInit:
   STR R2, [R0]
   BX LR
 
-delay_routine:                                              @== Fixed delay subroutine init (total cycles = 5)
+delay_routine_init:                                         @== Fixed delay subroutine init (total cycles = 2)
   LDR R7, DELAY_1
-  B delay_b
 
-delay_b:                                                    @== Fixed delay subroutine (total cycles = 5)
+delay_routine:                                              @== Fixed delay subroutine (total cycles = 5)
   SUBS R7, #1 @ 1
   CMP R7, #0 @ 1
-  BNE delay_b @ 3
+  BNE delay_routine @ 3
+  BX LR
+
+var_delay_routine_init:                                         @== Variable delay subroutine init (total cycles = 2)
+  BL pot_get                                                @ This will load R7 with the delay time
+
+var_delay_routine:                                              @== Variable delay subroutine (total cycles = 5)
+  SUBS R7, #1 @ 1
+  CMP R7, #0 @ 1
+  BNE var_delay_routine @ 3
+  BX LR
+
+pot_poll_init:                                              @== Inialisation of the pots (ADC etc)
+  LDR R0, RCC_START
+  LDR R1, [R0, 0x18]                                        @ Enable RCC for ADC
+  LDR R2, RCC_APB2ENR_ADC_EN
+  ORRS R1, R1, R2
+  STR R1, [R0, 0x18]
+
+  LDR R0, PORTA_START                                       @ Set PA6 to ANALOG
+  LDR R1, [R0]
+  LDR R2, GPIOA_MODER_MODER6
+  ORRS R1, R1, R2
+  STR R1, [R0]
+
+  LDR R0, ADC1_START                                        @ Select ADC channel 6
+  LDR R1, [R0, 0x28]
+  LDR R2, ADC_CHSELR_CHSEL6
+  ORRS R1, R1, R2
+  STR R1, [R0, 0x28]
+
+  LDR R1, [R0, 0x0C]                                        @ Set resolution to 8 bits
+  LDR R2, ADC_CFGR1_RES_1
+  ORRS R1, R1, R2
+  STR R1, [R0, 0x0C]
+
+  LDR R1, [R0, 0x08]                                        @ Set ADEN = 1
+  LDR R2, ADC_CR_ADEN
+  ORRS R1, R1, R2
+  STR R1, [R0, 0x08]
+
+  B pot_poll_init_wait
+
+pot_poll_init_wait:                                         @== Basically wait for the ADC to let us know it is ready
+  LDR R0, ADC1_START
+  LDR R1, [R0]
+  LDR R2, ADC_ISR_ADRDY
+  ANDS R1, R1, R2
+  CMP R1, #0
+  BEQ pot_poll_init_wait
+  BX LR
+
+pot_get:                                                    @== Gets the pot value
+  LDR R0, ADC1_START                                        @ Starting a conversion
+  LDR R1, [R0, 0x08]
+  LDR R2, ADC_CR_ADSTART
+  ORRS R1, R1, R2
+  STR R1, [R0, 0x08]
+  B pot_get_wait
+
+pot_get_wait:                                               @== Waits for conversion to be finished
+  LDR R1, [R0]
+  LDR R2, ADC_ISR_EOC
+  ANDS R1, R1, R2
+  CMP R1, #0
+  BEQ pot_get_wait
+  LDR R7, [R0, 0x40]
+  LDR R0, PORTB_START                                       @ Load start of PORTB back into R0 for displaying
   BX LR
 
   .align
@@ -119,52 +192,12 @@ STACK_1_START:          .word 0x20002000
 DELAY_1:                .word 0x000C3500
 RAM_START:              .word 0x20000000
 
-
-@== Data 
-     Experimental_Data: .word 0x00000001
-                        .word 0x00000001
-                        .word 0x00000002
-                        .word 0x00000003
-                        .word 0x00000005
-                        .word 0x00000008
-                        .word 0x0000000D
-                        .word 0x00000015
-                        .word 0x00000022
-                        .word 0x00000037
-                        .word 0x00000059
-                        .word 0x00000090
-                        .word 0x000000E9
-                        .word 0x00000179
-                        .word 0x00000262
-                        .word 0x000003DB
-                        .word 0x0000063D
-                        .word 0x00000A18
-                        .word 0x00001055
-                        .word 0x00001A6D
-                        .word 0x00002AC2
-                        .word 0x0000452F
-                        .word 0x00006FF1
-                        .word 0x0000B520
-                        .word 0x00012511
-                        .word 0x0001DA31
-                        .word 0x0002FF42
-                        .word 0x0004D973
-                        .word 0x0007D8B5
-                        .word 0x000CB228
-                        .word 0x00148ADD
-                        .word 0x00213D05
-                        .word 0x0035C7E2
-                        .word 0x005704E7
-                        .word 0x008CCCC9
-                        .word 0x00E3D1B0
-                        .word 0x01709E79
-                        .word 0x02547029
-                        .word 0x03C50EA2
-                        .word 0x06197ECB
-                        .word 0x09DE8D6D
-                        .word 0x0FF80C38
-                        .word 0x19D699A5
-                        .word 0x29CEA5DD
-                        .word 0x43A53F82
-                        .word 0x6D73E55F
-                        .word 0xB11924E1
+RCC_APB2ENR_ADC_EN:     .word 0x00000200 @ ADC enable bit
+GPIOA_MODER_MODER6:     .word 0x00003000 @ Port A6 analog mode
+ADC1_START:             .word 0x40012400 @ Start of ADC registers
+ADC_CHSELR_CHSEL6:      .word 0x00000040 @ Channel 6 select bit
+ADC_CFGR1_RES_1:        .word 0x00000010 @ 8 bit resolution bit
+ADC_CR_ADEN:            .word 0x00000001 @ ADEN = 1
+ADC_ISR_ADRDY:          .word 0x00000001 @ ADC ready bit
+ADC_CR_ADSTART:         .word 0x00000004 @ ADC conversion start bit
+ADC_ISR_EOC:            .word 0x00000004 @ ADC conversion complete bit
