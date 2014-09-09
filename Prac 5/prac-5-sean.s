@@ -26,23 +26,22 @@ Default_Handler:                                            @== Executed in the 
 
 _start:
   BL LEDInit                                                @ Enable the LEDs (Also enables the RCC clock for GPIOA, too lazy to omit)
-  @ LDR R4, =0x0
-  @ LDR R5, =0x0
-  @ PUSH (0x00000001)
-  @ PUSH (0x00000002)                                               @ Push first two numbers
-
-  LDR R1, =0x20000000                                       @ Some random data to 0x20000000 for test purposes
-  LDR R2, =0x2000F000
-  STR R2, [R1]
+  LDR R1, =0x1                                              @ Pushing the 1st two numbers to the stack
+  LDR R2, =0x1
+  PUSH {R1, R2}
 
 initialisations_complete:                                   @== New data loaded at 0x20000000
+  LDR R6, =0x2D                                             @ Start the counter to loop fib_loop 45 times
+
+fib_loop:
+ POP {R1, R2}
+ ADDS R1, R1, R2
+ PUSH {R1}
+ SUBS R6, #1
+ CMP R6, #0
+ BNE fib_loop
 
 fib_calc_complete:
-  LDR R1, =0x20000000
-  LDR R2, [R1]                                              @ Read in data from 0x20000000
-  MOVS R1, R2                                               @ Just move the address for uniformity
-  @@@ Grab the last stack word and put into R2
-  STR R2, [R1]                                              @ Store the stack word into the address we got just now
 
 cycle_patterns:
   LDR R0, PORTB_START
