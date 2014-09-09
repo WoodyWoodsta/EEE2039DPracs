@@ -8,36 +8,69 @@
 vectors:
   .word 0x20002000                                          @ Stack pointer reset value
   .word _start + 1                                          @ Reset vector (execution start specification)
-  .word Default_Handler                                     @ NMI handler - just redirecting to default handler for now
-  .word HardFault_Handler                                   @ Hardfault handler vector
+  .word Default_Handler + 1                                 @ NMI handler - just redirecting to default handler for now
+  .word HardFault_Handler + 1                               @ Hardfault handler vector
 
 
 HardFault_Handler:                                          @== Exectuted in the event of a hard fault
-  NOP
+  LDR R5, PORTB_START
+  LDR R6, =0xAA
+  STR R6, [R5, 0x14]
   B HardFault_Handler
 
 Default_Handler:                                            @== Executed in the event of any other fault or exception
-  NOP
+  LDR R0, PORTB_START
+  LDR R1, =0b11100011
+  STR R1, [R0, 0x14]
   B Default_Handler
 
 _start:
   BL LEDInit                                                @ Enable the LEDs (Also enables the RCC clock for GPIOA, too lazy to omit)
-  LDR R4, =0x0
-  LDR R5, =0x0
-  @ PUSH 0b101
-  @ PUSH 0b010                                                @ Push first two numbers
-  LDR R4, [SP]
-  LDR R5, [SP]
+  @ LDR R4, =0x0
+  @ LDR R5, =0x0
+  @ PUSH (0x00000001)
+  @ PUSH (0x00000002)                                               @ Push first two numbers
 
-test:
-  STR R4, [R0, 0x14]
-  BL delay
-  STR R5, [R0, 0x14]
-  BL delay
-  B test
+  LDR R1, =0x20000000                                       @ Some random data to 0x20000000 for test purposes
+  LDR R2, =0x2000F000
+  STR R2, [R1]
 
 initialisations_complete:                                   @== New data loaded at 0x20000000
 
+fib_calc_complete:
+  LDR R1, =0x20000000
+  LDR R2, [R1]                                              @ Read in data from 0x20000000
+  MOVS R1, R2                                               @ Just move the address for uniformity
+  @@@ Grab the last stack word and put into R2
+  STR R2, [R1]                                              @ Store the stack word into the address we got just now
+
+cycle_patterns:
+  LDR R0, PORTB_START
+  LDR R1, =0x0
+  STR R1, [R0, 0x14]
+  BL delay_routine
+  LDR R1, =0x81
+  STR R1, [R0, 0x14]
+  BL delay_routine
+  LDR R1, =0xC3
+  STR R1, [R0, 0x14]
+  BL delay_routine
+  LDR R1, =0xE7
+  STR R1, [R0, 0x14]
+  BL delay_routine
+  LDR R1, =0xFF
+  STR R1, [R0, 0x14]
+  BL delay_routine
+  LDR R1, =0x7E
+  STR R1, [R0, 0x14]
+  BL delay_routine
+  LDR R1, =0x3C
+  STR R1, [R0, 0x14]
+  BL delay_routine
+  LDR R1, =0x18
+  STR R1, [R0, 0x14]
+  BL delay_routine
+  B cycle_patterns
 
 
 @== Common or lame routines to be called
@@ -51,13 +84,16 @@ LEDInit:
   LDR R0, PORTB_START
   LDR R2, PORTB_MODEROUT                                    @ Set Port B Mode to OUTPUT
   STR R2, [R0]
-  BX LR`
+  BX LR
 
-delay:
+delay_routine:
   LDR R7, DELAY_1
+  B delay_b
+
+delay_b:
   SUBS R7, #1
   CMP R7, #0
-  BNE delay
+  BNE delay_b
   BX LR
 
   .align
@@ -70,7 +106,7 @@ PORTA_PUPDR:            .word 0x55
 PORTB_START:            .word 0x48000400
 PORTB_MODEROUT:         .word 0x00005555
 STACK_1_START:          .word 0x20002000
-DELAY_1:                .word 0x00090000
+DELAY_1:                .word 0x00020000
 
 
 @== Data 
