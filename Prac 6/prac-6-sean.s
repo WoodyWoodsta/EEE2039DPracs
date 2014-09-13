@@ -21,6 +21,26 @@ vectors:                                                    @== All those vector
   .word Default_Handler + 1                                 @ 0x30: reserved
   .word Default_Handler + 1                                 @ 0x34: reserved
   .word Default_Handler + 1                                 @ 0x38: SysTick vector
+  .word Default_Handler + 1                                 @ 0x3C: reserved
+  .word Default_Handler + 1                                 @ 0x40: reserved
+  .word Default_Handler + 1                                 @ 0x44: reserved
+  .word Default_Handler + 1                                 @ 0x48: reserved
+  .word Default_Handler + 1                                 @ 0x4C: reserved
+  .word Default_Handler + 1                                 @ 0x50: reserved
+  .word Default_Handler + 1                                 @ 0x54: reserved
+  .word Default_Handler + 1                                 @ 0x58: reserved
+  .word Default_Handler + 1                                 @ 0x5C: reserved
+  .word Default_Handler + 1                                 @ 0x60: reserved
+  .word Default_Handler + 1                                 @ 0x64: reserved
+  .word Default_Handler + 1                                 @ 0x6C: reserved
+  .word Default_Handler + 1                                 @ 0x70: reserved
+  .word Default_Handler + 1                                 @ 0x74: reserved
+  .word Default_Handler + 1                                 @ 0x78: reserved
+  .word Default_Handler + 1                                 @ 0x7C: reserved
+  .word Default_Handler + 1                                 @ 0x80: reserved
+  .word Default_Handler + 1                                 @ 0x84: reserved
+  .word Default_Handler + 1                                 @ 0x88: reserved
+  .word TIM6_ADC_IRQHandler + 1                             @ 0x8C: TIM6 ISR vector
 
 
 HardFault_Handler:                                          @== Exectuted in the event of a hard fault
@@ -38,6 +58,11 @@ Default_Handler:                                            @== Executed in the 
 _start:
   BL LEDInit                                                @ Enable the LEDs
   BL pot_poll_init                                          @ Enable ADC for POT0
+  BL TIM6_init
+
+infinite:
+  NOP
+  B infinite
     @ enable clock to ADC, Timer 6, GPIOA, GPIOB
     @ set pins to correct modes
     @ pullups for buttons
@@ -49,6 +74,15 @@ _start:
     @ enable the interrupt for the timer in the NVIC
 
 TIM6_ADC_IRQHandler:                                        @== Interrupt Service Routine (for ADC and TIM6)
+  LDR R0, TIM6_START
+  LDR R1, [R0, 0x10]
+  LDR R2, =0x1
+  EORS R1, R1, R2
+  STR R1, [R0, 0x10]
+  LDR R0, PORTB_START
+  ADDS R4, #1
+  STR R4, [R0, 0x14]
+  BX LR
     @ acknowledge interrupt
 
     @ ==== Part 2 suggested algoritim ====
@@ -139,6 +173,37 @@ pot_get_wait:                                               @== Waits for conver
   LDR R0, PORTB_START
   BX LR
 
+TIM6_init:                                                  @== Initialise TIMER 6
+  LDR R0, RCC_START
+  LDR R1, RCC_APB1ENR_TIM6_EN                               @ Enable RCC for Timer 6
+  LDR R2, [R0, 0x1C]
+  ORRS R1, R1, R2
+  STR R1, [R0, 0x1C]
+
+  LDR R0, TIM6_START                                        @ Set ARR to a default value for now
+  LDR R1, TIM6_DELAY_DEF
+  STR R1, [R0, 0x2C]
+
+  @ No need to set the prescalar here
+
+  LDR R1, TIM6_CR1_CEN                                      @ Start the clock!
+  LDR R2, [R0]
+  ORRS R1, R1, R2
+  STR R1, [R0]
+
+  LDR R1, TIM6_DIER_IEN                                     @ Enable the interupt thingy
+  LDR R2, [R0, 0x0C]
+  ORRS R1, R1, R2
+  STR R1, [R0, 0x0C]
+
+  LDR R0, ISER_ADDR                                         @ Enable TIM 6 interrupt in the NVIC
+  LDR R1, ISER_TIM6_EN
+  LDR R2, [R0]
+  ORRS R1, R1, R2
+  STR R1, [R0]
+
+  BX LR
+
   .align
 @== Program Variables
 RCC_START:              .word 0x40021000
@@ -150,8 +215,9 @@ PORTB_START:            .word 0x48000400
 PORTB_MODEROUT:         .word 0x00005555
 STACK_1_START:          .word 0x20002000
 DELAY_1:                .word 0x000C3500 @ 0.5 secs
-VARDELAY_GRAD:          .word 0x00000C65 @ Gradient for the linear pot/dely relationship
+VARDELAY_GRAD:          .word 0x00000C65 @ Gradient for the linear pot/delay relationship
 RAM_START:              .word 0x20000000
+TIM6_START:             .word 0x40001000
 
 RCC_APB2ENR_ADC_EN:     .word 0x00000200 @ ADC enable bit
 GPIOA_MODER_MODER5:     .word 0x00000C00 @ Port A5 analog mode
@@ -164,3 +230,10 @@ ADC_CR_ADEN:            .word 0x00000001 @ ADEN = 1
 ADC_ISR_ADRDY:          .word 0x00000001 @ ADC ready bit
 ADC_CR_ADSTART:         .word 0x00000004 @ ADC conversion start bit
 ADC_ISR_EOC:            .word 0x00000004 @ ADC conversion complete bit
+
+RCC_APB1ENR_TIM6_EN:    .word 0x00000010 @ TIM6 enable bit
+TIM6_DELAY_DEF:         .word 0x001F0000 @ Default Timer 6 delay
+TIM6_CR1_CEN:           .word 0x00000001 @ TIM 6 counter enable bit 
+TIM6_DIER_IEN:          .word 0x00000001 @ Update interrupt enable bit
+ISER_ADDR:              .word 0xE000E100 @ NVIC interrupt set-enable register
+ISER_TIM6_EN:           .word 0x00020000 @ TIM 6 NVIC interrupt enable bit
