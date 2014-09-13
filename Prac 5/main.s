@@ -204,3 +204,4 @@ ADC_CR_ADEN:            .word 0x00000001 @ ADEN = 1
 ADC_ISR_ADRDY:          .word 0x00000001 @ ADC ready bit
 ADC_CR_ADSTART:         .word 0x00000004 @ ADC conversion start bit
 ADC_ISR_EOC:            .word 0x00000004 @ ADC conversion complete bit
+
