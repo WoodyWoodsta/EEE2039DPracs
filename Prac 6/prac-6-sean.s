@@ -6,10 +6,10 @@
   .global _start
 
 vectors:                                                    @== All those vectors!
-  .word 0x20002000                                          @ Stack pointer reset value
-  .word _start + 1                                          @ Reset vector (execution start specification)
-  .word Default_Handler + 1                                 @ 0x04: NMI handler - just redirecting to default handler for now
-  .word HardFault_Handler + 1                               @ 0x06: Hardfault handler vector
+  .word 0x20002000                                          @ 0x00: Stack pointer reset value
+  .word _start + 1                                          @ 0x04: Reset vector (execution start specification)
+  .word Default_Handler + 1                                 @ 0x08: NMI handler - just redirecting to default handler for now
+  .word HardFault_Handler + 1                               @ 0x0C: Hardfault handler vector
   .word Default_Handler + 1                                 @ 0x10: reserved
   .word Default_Handler + 1                                 @ 0x14: reserved
   .word Default_Handler + 1                                 @ 0x18: reserved
@@ -20,8 +20,8 @@ vectors:                                                    @== All those vector
   .word Default_Handler + 1                                 @ 0x2C: SVCall vector
   .word Default_Handler + 1                                 @ 0x30: reserved
   .word Default_Handler + 1                                 @ 0x34: reserved
-  .word Default_Handler + 1                                 @ 0x38: SysTick vector
-  .word Default_Handler + 1                                 @ 0x3C: reserved
+  .word Default_Handler + 1                                 @ 0x38: reserved
+  .word Default_Handler + 1                                 @ 0x3C: SysTick vector
   .word Default_Handler + 1                                 @ 0x40: reserved
   .word Default_Handler + 1                                 @ 0x44: reserved
   .word Default_Handler + 1                                 @ 0x48: reserved
@@ -32,15 +32,18 @@ vectors:                                                    @== All those vector
   .word Default_Handler + 1                                 @ 0x5C: reserved
   .word Default_Handler + 1                                 @ 0x60: reserved
   .word Default_Handler + 1                                 @ 0x64: reserved
+  .word Default_Handler + 1                                 @ 0x68: reserved
   .word Default_Handler + 1                                 @ 0x6C: reserved
   .word Default_Handler + 1                                 @ 0x70: reserved
   .word Default_Handler + 1                                 @ 0x74: reserved
   .word Default_Handler + 1                                 @ 0x78: reserved
   .word Default_Handler + 1                                 @ 0x7C: reserved
   .word Default_Handler + 1                                 @ 0x80: reserved
-  .word Default_Handler + 1                                 @ 0x84: reserved
+  .word TIM6_ADC_IRQHandler + 1                             @ 0x84: TIM6 ISR vector
   .word Default_Handler + 1                                 @ 0x88: reserved
-  .word TIM6_ADC_IRQHandler + 1                             @ 0x8C: TIM6 ISR vector
+  .word Default_Handler + 1                                 @ 0x8C: reserved
+
+
 
 
 HardFault_Handler:                                          @== Exectuted in the event of a hard fault
@@ -63,43 +66,15 @@ _start:
 infinite:
   NOP
   B infinite
-    @ enable clock to ADC, Timer 6, GPIOA, GPIOB
-    @ set pins to correct modes
-    @ pullups for buttons
-    @ enable ADC
-    @ wait until ADC ready. As per Section 13.4.4: the ADC must be ready before writing to its other registers
-    @ select channel and resolution/alignment 
-    @ initialise timer: Set ARR, PSR, enable update interrupt
-    @ start counter counting
-    @ enable the interrupt for the timer in the NVIC
 
 TIM6_ADC_IRQHandler:                                        @== Interrupt Service Routine (for ADC and TIM6)
   LDR R0, TIM6_START
-  LDR R1, [R0, 0x10]
-  LDR R2, =0x1
-  EORS R1, R1, R2
+  LDR R1, =0x0
   STR R1, [R0, 0x10]
   LDR R0, PORTB_START
   ADDS R4, #1
   STR R4, [R0, 0x14]
   BX LR
-    @ acknowledge interrupt
-
-    @ ==== Part 2 suggested algoritim ====
-    @ Read GPIOB_ODR (remember, we're only interested in the LSB!)
-    @ if SW3 is held down: add 1 to it
-    @ else: subtract 1 from it
-    @ write it back
-
-    @ ==== Part 3 suggested algorithm ====
-    @ if SW2 is held down:
-        @ kick off an ADC conversion from POT1
-        @ modify timer duration using result of conversion
-    @ else:
-        @ set the IRQ frequency to the default state
-
-    @ return from interrupt here
-
 
 @== Subroutines
 
@@ -184,17 +159,21 @@ TIM6_init:                                                  @== Initialise TIMER
   LDR R1, TIM6_DELAY_DEF
   STR R1, [R0, 0x2C]
 
-  @ No need to set the prescalar here
+  LDR R1, =0x4                                              @ Set the prescalar to 4 (4 times as slow)
+  STR R1, [R0, 0x28]
+
+  LDR R1, =0x0                                              @ Clear any possible interrupt
+  STR R1, [R0, 0x10]
+
+  LDR R1, TIM6_DIER_IEN                                     @ Enable the interupt for TIM6
+  LDR R2, [R0, 0x0C]
+  ORRS R1, R1, R2
+  STR R1, [R0, 0x0C]
 
   LDR R1, TIM6_CR1_CEN                                      @ Start the clock!
   LDR R2, [R0]
   ORRS R1, R1, R2
   STR R1, [R0]
-
-  LDR R1, TIM6_DIER_IEN                                     @ Enable the interupt thingy
-  LDR R2, [R0, 0x0C]
-  ORRS R1, R1, R2
-  STR R1, [R0, 0x0C]
 
   LDR R0, ISER_ADDR                                         @ Enable TIM 6 interrupt in the NVIC
   LDR R1, ISER_TIM6_EN
@@ -232,7 +211,7 @@ ADC_CR_ADSTART:         .word 0x00000004 @ ADC conversion start bit
 ADC_ISR_EOC:            .word 0x00000004 @ ADC conversion complete bit
 
 RCC_APB1ENR_TIM6_EN:    .word 0x00000010 @ TIM6 enable bit
-TIM6_DELAY_DEF:         .word 0x001F0000 @ Default Timer 6 delay
+TIM6_DELAY_DEF:         .word 0x0000FFFF @ Default Timer 6 delay
 TIM6_CR1_CEN:           .word 0x00000001 @ TIM 6 counter enable bit 
 TIM6_DIER_IEN:          .word 0x00000001 @ Update interrupt enable bit
 ISER_ADDR:              .word 0xE000E100 @ NVIC interrupt set-enable register
