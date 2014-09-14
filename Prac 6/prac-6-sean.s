@@ -39,11 +39,9 @@ vectors:                                                    @== All those vector
   .word Default_Handler + 1                                 @ 0x78: reserved
   .word Default_Handler + 1                                 @ 0x7C: reserved
   .word Default_Handler + 1                                 @ 0x80: reserved
-  .word TIM6_ADC_IRQHandler + 1                             @ 0x84: TIM6 ISR vector
+  .word TIM6_ADC_IRQHandler_A + 1                             @ 0x84: TIM6 ISR vector
   .word Default_Handler + 1                                 @ 0x88: reserved
   .word Default_Handler + 1                                 @ 0x8C: reserved
-
-
 
 
 HardFault_Handler:                                          @== Exectuted in the event of a hard fault
@@ -67,13 +65,20 @@ infinite:
   NOP
   B infinite
 
-TIM6_ADC_IRQHandler:                                        @== Interrupt Service Routine (for ADC and TIM6)
-  LDR R0, TIM6_START
-  LDR R1, =0x0
-  STR R1, [R0, 0x10]
+TIM6_ADC_IRQHandler_A:                                        @== Interrupt Service Routine (for ADC and TIM6)
+  B pot_get                                                @ Scale the delay based on pot value
+  
+TIM6_ADC_IRQHandler_B:
+  LDR R6, TIM6_DELAY_GRAD
+  MULS R7, R7, R6
+  ADDS R7, #1
+  STR R7, [R0, 0x2C]
   LDR R0, PORTB_START
   ADDS R4, #1
   STR R4, [R0, 0x14]
+  LDR R0, TIM6_START
+  LDR R1, =0x0
+  STR R1, [R0, 0x10]
   BX LR
 
 @== Subroutines
@@ -88,7 +93,6 @@ LEDInit:
   LDR R2, PORTB_MODEROUT                                    @ Set Port B Mode to OUTPUT
   STR R2, [R0]
   BX LR
-
 
 pot_poll_init:                                              @== Inialisation of the pots (ADC etc)
   LDR R0, RCC_START
@@ -145,8 +149,8 @@ pot_get_wait:                                               @== Waits for conver
   CMP R1, #0
   BEQ pot_get_wait
   LDR R7, [R0, 0x40]
-  LDR R0, PORTB_START
-  BX LR
+  LDR R0, TIM6_START
+  B TIM6_ADC_IRQHandler_B
 
 TIM6_init:                                                  @== Initialise TIMER 6
   LDR R0, RCC_START
@@ -159,16 +163,16 @@ TIM6_init:                                                  @== Initialise TIMER
   LDR R1, TIM6_DELAY_DEF
   STR R1, [R0, 0x2C]
 
-  LDR R1, =0x4                                              @ Set the prescalar to 4 (4 times as slow)
+  LDR R1, =0x64                                              @ Set the prescalar to 16 (16 times as slow)
   STR R1, [R0, 0x28]
-
-  LDR R1, =0x0                                              @ Clear any possible interrupt
-  STR R1, [R0, 0x10]
 
   LDR R1, TIM6_DIER_IEN                                     @ Enable the interupt for TIM6
   LDR R2, [R0, 0x0C]
   ORRS R1, R1, R2
   STR R1, [R0, 0x0C]
+
+  LDR R1, =0x0                                              @ Clear any possible interrupt
+  STR R1, [R0, 0x10]
 
   LDR R1, TIM6_CR1_CEN                                      @ Start the clock!
   LDR R2, [R0]
@@ -211,7 +215,8 @@ ADC_CR_ADSTART:         .word 0x00000004 @ ADC conversion start bit
 ADC_ISR_EOC:            .word 0x00000004 @ ADC conversion complete bit
 
 RCC_APB1ENR_TIM6_EN:    .word 0x00000010 @ TIM6 enable bit
-TIM6_DELAY_DEF:         .word 0x0000FFFF @ Default Timer 6 delay
+TIM6_DELAY_DEF:         .word 0x0000F424 @ Default Timer 6 delay
+TIM6_DELAY_GRAD:        .word 0x00000104 @ Gradient for pot relationship
 TIM6_CR1_CEN:           .word 0x00000001 @ TIM 6 counter enable bit 
 TIM6_DIER_IEN:          .word 0x00000001 @ Update interrupt enable bit
 ISER_ADDR:              .word 0xE000E100 @ NVIC interrupt set-enable register
