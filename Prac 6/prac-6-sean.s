@@ -39,7 +39,7 @@ vectors:                                                    @== All those vector
   .word Default_Handler + 1                                 @ 0x78: reserved
   .word Default_Handler + 1                                 @ 0x7C: reserved
   .word Default_Handler + 1                                 @ 0x80: reserved
-  .word TIM6_ADC_IRQHandler_A + 1                             @ 0x84: TIM6 ISR vector
+  .word TIM6_ADC_IRQHandler_init + 1                             @ 0x84: TIM6 ISR vector
   .word Default_Handler + 1                                 @ 0x88: reserved
   .word Default_Handler + 1                                 @ 0x8C: reserved
 
@@ -65,14 +65,27 @@ infinite:
   NOP
   B infinite
 
-TIM6_ADC_IRQHandler_A:                                        @== Interrupt Service Routine (for ADC and TIM6)
-  B pot_get                                                @ Scale the delay based on pot value
+TIM6_ADC_IRQHandler_init:                                   @== Interrupt Service Routine (for ADC and TIM6)
+  LDR R0, PORTA_START
+  LDR R1, [R0, 0x10]
+  LDR R2, =0b1111
+  ANDS R1, R1, R2
+  CMP R1, #11
+  BEQ pot_get                                                 @ Fetch the pot value
+  LDR R0, TIM6_START
+  LDR R1, TIM6_DELAY_DEF
+  STR R1, [R0, 0x2C]
+  LDR R1, =0x0
+  STR R1, [R0, 0x24]
+  B TIM6_ADC_IRQHandler_B
   
-TIM6_ADC_IRQHandler_B:
+TIM6_ADC_IRQHandler_A:                                      @== Handles the scaling if SW was pressed
   LDR R6, TIM6_DELAY_GRAD
   MULS R7, R7, R6
   ADDS R7, #1
   STR R7, [R0, 0x2C]
+  
+TIM6_ADC_IRQHandler_B:  
   LDR R0, PORTB_START
   ADDS R4, #1
   STR R4, [R0, 0x14]
@@ -92,6 +105,13 @@ LEDInit:
   LDR R0, PORTB_START
   LDR R2, PORTB_MODEROUT                                    @ Set Port B Mode to OUTPUT
   STR R2, [R0]
+  LDR R0, PORTA_START
+  LDR R1, PORTA_PUPDR
+  LDR R2, [R0, 0x0C]
+  ORRS R1, R1, R2
+  STR R1, [R0, 0x0C]
+  LDR R1, PORTA_MODERIN
+  STR R1, [R0]
   BX LR
 
 pot_poll_init:                                              @== Inialisation of the pots (ADC etc)
@@ -150,7 +170,7 @@ pot_get_wait:                                               @== Waits for conver
   BEQ pot_get_wait
   LDR R7, [R0, 0x40]
   LDR R0, TIM6_START
-  B TIM6_ADC_IRQHandler_B
+  B TIM6_ADC_IRQHandler_A
 
 TIM6_init:                                                  @== Initialise TIMER 6
   LDR R0, RCC_START
