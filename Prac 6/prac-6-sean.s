@@ -69,30 +69,53 @@ TIM6_ADC_IRQHandler_init:                                   @== Interrupt Servic
   LDR R0, PORTA_START
   LDR R1, [R0, 0x10]
   LDR R2, =0b1111
+  EORS R1, R1, R2
+  LDR R2, =0b1000
   ANDS R1, R1, R2
-  CMP R1, #11
+  CMP R1, #8
+  BEQ subtract
+  LDR R0, PORTB_START
+  LDR R4, [R0, 0x14]
+  ADDS R4, #1
+  STR R4, [R0, 0x14]
+
+TIM6_ADC_IRQHandler_init_A:
+  LDR R0, PORTA_START
+  LDR R1, [R0, 0x10]
+  LDR R2, =0b1111
+  EORS R1, R1, R2
+  LDR R2, =0b0100
+  ANDS R1, R1, R2
+  CMP R1, #4
   BEQ pot_get                                                 @ Fetch the pot value
   LDR R0, TIM6_START
   LDR R1, TIM6_DELAY_DEF
   STR R1, [R0, 0x2C]
   LDR R1, =0x0
   STR R1, [R0, 0x24]
-  B TIM6_ADC_IRQHandler_B
+  B TIM6_ADC_IRQHandler_C
   
-TIM6_ADC_IRQHandler_A:                                      @== Handles the scaling if SW was pressed
+TIM6_ADC_IRQHandler_B:                                      @== Handles the scaling if SW was pressed
   LDR R6, TIM6_DELAY_GRAD
+  LDR R5, =0xFE
+  SUBS R7, R5, R7
   MULS R7, R7, R6
   ADDS R7, #1
   STR R7, [R0, 0x2C]
   
-TIM6_ADC_IRQHandler_B:  
-  LDR R0, PORTB_START
-  ADDS R4, #1
-  STR R4, [R0, 0x14]
+TIM6_ADC_IRQHandler_C:  
   LDR R0, TIM6_START
   LDR R1, =0x0
   STR R1, [R0, 0x10]
   BX LR
+
+subtract:
+  LDR R0, PORTB_START
+  LDR R4, [R0, 0x14]
+  SUBS R4, #1
+  STR R4, [R0, 0x14]
+  B TIM6_ADC_IRQHandler_init_A
+
 
 @== Subroutines
 
@@ -170,7 +193,7 @@ pot_get_wait:                                               @== Waits for conver
   BEQ pot_get_wait
   LDR R7, [R0, 0x40]
   LDR R0, TIM6_START
-  B TIM6_ADC_IRQHandler_A
+  B TIM6_ADC_IRQHandler_B
 
 TIM6_init:                                                  @== Initialise TIMER 6
   LDR R0, RCC_START
