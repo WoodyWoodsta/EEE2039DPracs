@@ -39,7 +39,7 @@ vectors:                                                    @== All those vector
   .word Default_Handler + 1                                 @ 0x78: reserved
   .word Default_Handler + 1                                 @ 0x7C: reserved
   .word Default_Handler + 1                                 @ 0x80: reserved
-  .word TIM6_ADC_IRQHandler_init + 1                             @ 0x84: TIM6 ISR vector
+  .word TIM6_ADC_IRQHandler_init + 1                        @ 0x84: TIM6 ISR vector
   .word Default_Handler + 1                                 @ 0x88: reserved
   .word Default_Handler + 1                                 @ 0x8C: reserved
 
@@ -60,14 +60,6 @@ _start:
   BL LEDInit                                                @ Enable the LEDs
   BL pot_poll_init                                          @ Enable ADC for POT0
   BL TIM6_init
-
-@ test_init:
-@   B pot_get
-
-@ test:
-@   LDR R0, PORTB_START
-@   STR R7, [R0, 0x14]
-@   B test_init
 
 infinite:
   NOP
