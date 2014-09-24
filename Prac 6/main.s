@@ -195,6 +195,7 @@ pot_get_wait:                                               @== Waits for conver
   @ B test
   B TIM6_ADC_IRQHandler_B
 
+bbb
 TIM6_init:                                                  @== Initialise TIMER 6
   LDR R0, RCC_START
   LDR R1, RCC_APB1ENR_TIM6_EN                               @ Enable RCC for Timer 6
@@ -265,3 +266,4 @@ TIM6_CR1_CEN:           .word 0x00000001 @ TIM 6 counter enable bit
 TIM6_DIER_IEN:          .word 0x00000001 @ Update interrupt enable bit
 ISER_ADDR:              .word 0xE000E100 @ NVIC interrupt set-enable register
 ISER_TIM6_EN:           .word 0x00020000 @ TIM 6 NVIC interrupt enable bit
+
