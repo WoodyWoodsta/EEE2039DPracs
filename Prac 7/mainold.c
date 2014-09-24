@@ -11,5 +11,6 @@ void main(void) {
     
     // cause the program to hang in an infinite loop here.
     // In other words: do not let main return.
+  while(1);
 
 }
