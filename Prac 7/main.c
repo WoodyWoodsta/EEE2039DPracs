@@ -4,7 +4,6 @@
 
 #include <stdint.h>                                                                           // Include the standard data types
 
-
 uint32_t RCC_AHBENR_IOPBEN = 0x40000;
 uint32_t GPIOB_MODER_OUTPUT = 0x5555;
 

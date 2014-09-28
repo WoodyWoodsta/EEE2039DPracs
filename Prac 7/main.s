@@ -36,7 +36,7 @@ GPIOB_MODER_OUTPUT:
 main:
 .LFB0:
 	.file 1 "main.c"
-	.loc 1 11 0
+	.loc 1 10 0
 	.cfi_startproc
 	push	{r7, lr}
 	.cfi_def_cfa_offset 8
@@ -44,7 +44,7 @@ main:
 	.cfi_offset 14, -4
 	add	r7, sp, #0
 	.cfi_def_cfa_register 7
-	.loc 1 12 0
+	.loc 1 11 0
 	ldr	r3, .L3
 	ldr	r2, .L3
 	ldr	r1, [r2]
@@ -52,7 +52,7 @@ main:
 	ldr	r2, [r2]
 	orr	r2, r1
 	str	r2, [r3]
-	.loc 1 13 0
+	.loc 1 12 0
 	ldr	r3, .L3+8
 	ldr	r2, .L3+8
 	ldr	r1, [r2]
@@ -60,12 +60,12 @@ main:
 	ldr	r2, [r2]
 	orr	r2, r1
 	str	r2, [r3]
-	.loc 1 14 0
+	.loc 1 13 0
 	ldr	r3, .L3+16
 	mov	r2, #170
 	str	r2, [r3]
 .L2:
-	.loc 1 16 0 discriminator 1
+	.loc 1 15 0 discriminator 1
 	b	.L2
 .L4:
 	.align	2
@@ -148,7 +148,7 @@ main:
 	.uleb128 0x5
 	.4byte	.LASF16
 	.byte	0x1
-	.byte	0xb
+	.byte	0xa
 	.4byte	.LFB0
 	.4byte	.LFE0-.LFB0
 	.uleb128 0x1
@@ -156,7 +156,7 @@ main:
 	.uleb128 0x6
 	.4byte	.LASF11
 	.byte	0x1
-	.byte	0x8
+	.byte	0x7
 	.4byte	0x76
 	.uleb128 0x5
 	.byte	0x3
@@ -164,7 +164,7 @@ main:
 	.uleb128 0x6
 	.4byte	.LASF12
 	.byte	0x1
-	.byte	0x9
+	.byte	0x8
 	.4byte	0x76
 	.uleb128 0x5
 	.byte	0x3
