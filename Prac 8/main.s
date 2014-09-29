@@ -144,8 +144,7 @@ main:
 	sxtb	r2, r2
 	str	r2, [r3]
 	.loc 1 27 0 discriminator 1
-	ldr	r3, .L3+24
-	mov	r0, r3
+	mov	r0, #50
 	bl	delay
 	.loc 1 28 0 discriminator 1
 	ldr	r3, .L3+20
@@ -154,8 +153,7 @@ main:
 	sxtb	r2, r2
 	str	r2, [r3]
 	.loc 1 29 0 discriminator 1
-	ldr	r3, .L3+24
-	mov	r0, r3
+	mov	r0, #50
 	bl	delay
 	.loc 1 30 0 discriminator 1
 	b	.L2
@@ -168,7 +166,6 @@ main:
 	.word	1207960576
 	.word	GPIOB_MODER_OUTPUT
 	.word	1207960596
-	.word	80000
 	.cfi_endproc
 .LFE0:
 	.size	main, .-main
@@ -289,25 +286,34 @@ delay:
 	.cfi_def_cfa_register 7
 	str	r0, [r7, #4]
 	.loc 1 48 0
+	ldr	r3, [r7, #4]
+	ldr	r2, .L13
+	mul	r3, r2
+	str	r3, [r7, #4]
+	.loc 1 49 0
 	mov	r3, #0
 	str	r3, [r7, #12]
 	b	.L11
 .L12:
-	.loc 1 49 0
+	.loc 1 50 0
 	ldr	r3, [r7, #12]
 	add	r3, r3, #1
 	str	r3, [r7, #12]
 .L11:
-	.loc 1 48 0 discriminator 1
+	.loc 1 49 0 discriminator 1
 	ldr	r2, [r7, #12]
 	ldr	r3, [r7, #4]
 	cmp	r2, r3
 	bls	.L12
-	.loc 1 51 0
+	.loc 1 52 0
 	mov	sp, r7
 	add	sp, sp, #16
 	@ sp needed
 	pop	{r7, pc}
+.L14:
+	.align	2
+.L13:
+	.word	615
 	.cfi_endproc
 .LFE2:
 	.size	delay, .-delay

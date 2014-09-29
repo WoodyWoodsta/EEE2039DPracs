@@ -24,9 +24,9 @@ int main(void) {
 
   while(1) {
     *((uint32_t*)0x48000400 + 5) = min;
-    delay(80000);
+    delay(50);
     *((uint32_t*)0x48000400 + 5) = max;
-    delay(80000);
+    delay(50);
   }
 
 
@@ -45,6 +45,7 @@ void find_min_max(int8_t *array, uint32_t length, int8_t *max_ptr, int8_t *min_p
 
 void delay(uint32_t length) {
   uint32_t i;
+  length = length * 615; // Scaling to get 1 ms input parameter (length)
   for (i = 0; i <= length;) { // Do nothing really
     i++;
   }
