@@ -1,36 +1,46 @@
 //WDXSEA003 CHTREE002
 
-// C for Prac 8
+// Includes ----
 
 #include <stdint.h>
-#include <stdlib.h>
+// #include <stdlib.h>
+
+// Definitions ----
 
 #define EVER ;;
 
-void find_min_max(int8_t *array, uint32_t length, int8_t *max_ptr, int8_t *min_ptr);
-void delay(uint32_t length);
+// Declarations ----
+
+void find_min_max(int8_t *array, uint32_t length, int8_t *max_ptr, int8_t *min_ptr); // Declaration of the find_min_max function
+void delay(uint32_t length); // Declaration of the delay function
+void initLEDs();
+
+// Global Variables ----
 
 uint32_t RCC_AHBENR_IOPBEN = 0x40000;
 uint32_t GPIOB_MODER_OUTPUT = 0x5555;
 
+
 int main(void) {
-  int8_t array[40] = {-4, 31, -51, 62, -45, 58, -99, 105, -6, 60, 37, 106, -106, -96, 97, 50, -116, -38, 38, -52, -64, -68, 75, 117, 111, 100, 116, 11, 46, -64, -82, -74, -3, 0, 44, 64, -6, 1, -119, 123};
+  // Create arrays to be processed
+  int8_t array[] = {-4, 31, -51, 62, -45, 58, -99, 105, -6, 60, 37, 106, -106, -96, 97, 50, -116, -38, 38, -52, -64, -68, 75, 117, 111, 100, 116, 11, 46, -64, -82, -74, -3, 0, 44, 64, -6, 1, -119, 123};
   int8_t min = array[0];
   int8_t max = array[0];
-  find_min_max(&array[0], sizeof(array), &max, &min);
   
-  *(uint32_t*)0x40021014 |= RCC_AHBENR_IOPBEN;
-  *(uint32_t*)0x48000400 |= GPIOB_MODER_OUTPUT;
+  // Run the find_min_ax function
+  find_min_max(&array[0], sizeof(array), &max, &min);
+  initLEDs();
 
+  // Display results on the LEDs
   while(1) {
     *((uint32_t*)0x48000400 + 5) = min;
-    delay(50);
+    delay(1000);
     *((uint32_t*)0x48000400 + 5) = max;
-    delay(50);
+    delay(1000);
   }
 
-
-  for(EVER);                                                               // Loop forever :)
+  // Loop forever :)
+  for(EVER);
 
   return 0;
 }
@@ -49,4 +59,9 @@ void delay(uint32_t length) {
   for (i = 0; i <= length;) { // Do nothing really
     i++;
   }
+}
+
+void initLEDs() {
+  *(uint32_t*)0x40021014 |= RCC_AHBENR_IOPBEN;
+  *(uint32_t*)0x48000400 |= GPIOB_MODER_OUTPUT;
 }
