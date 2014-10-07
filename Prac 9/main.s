@@ -24,10 +24,8 @@ main:
 	.file 1 "main.c"
 	.loc 1 21 0
 	.cfi_startproc
-	push	{r3, r4, r7, lr}
-	.cfi_def_cfa_offset 16
-	.cfi_offset 3, -16
-	.cfi_offset 4, -12
+	push	{r7, lr}
+	.cfi_def_cfa_offset 8
 	.cfi_offset 7, -8
 	.cfi_offset 14, -4
 	add	r7, sp, #0
@@ -39,20 +37,28 @@ main:
 	.loc 1 25 0
 	mov	r0, #1
 	bl	initADCPot
-.L2:
-	.loc 1 29 0 discriminator 1
-	ldr	r4, .L3
-	mov	r0, #2
+.L4:
+	.loc 1 32 0
+	mov	r0, #3
 	bl	getPB
 	mov	r3, r0
-	uxth	r3, r3
-	strh	r3, [r4, #20]
-	.loc 1 30 0 discriminator 1
-	b	.L2
-.L4:
-	.align	2
+	cmp	r3, #0
+	beq	.L2
+	.loc 1 33 0
+	mov	r3, #1
+	neg	r3, r3
+	mov	r0, r3
+	bl	incrementLEDs
+	b	.L3
+.L2:
+	.loc 1 36 0
+	mov	r0, #1
+	bl	incrementLEDs
 .L3:
-	.word	1207960576
+	.loc 1 38 0
+	bl	variable_delay
+	.loc 1 39 0
+	b	.L4
 	.cfi_endproc
 .LFE33:
 	.size	main, .-main
@@ -63,18 +69,45 @@ main:
 	.type	variable_delay, %function
 variable_delay:
 .LFB34:
-	.loc 1 34 0
+	.loc 1 43 0
 	.cfi_startproc
 	push	{r7, lr}
 	.cfi_def_cfa_offset 8
 	.cfi_offset 7, -8
 	.cfi_offset 14, -4
+	sub	sp, sp, #8
+	.cfi_def_cfa_offset 16
 	add	r7, sp, #0
 	.cfi_def_cfa_register 7
-	.loc 1 43 0
+	.loc 1 44 0
+	ldr	r3, .L7
+	str	r3, [r7, #4]
+	.loc 1 45 0
+	mov	r0, #2
+	bl	getPB
+	mov	r3, r0
+	cmp	r3, #0
+	beq	.L6
+	.loc 1 46 0
+	bl	getPot
+	mov	r3, r0
+	add	r3, r3, #250
+	lsl	r3, r3, #2
+	str	r3, [r7, #4]
+.L6:
+	.loc 1 49 0
+	ldr	r3, [r7, #4]
+	mov	r0, r3
+	bl	delay
+	.loc 1 50 0
 	mov	sp, r7
+	add	sp, sp, #8
 	@ sp needed
 	pop	{r7, pc}
+.L8:
+	.align	2
+.L7:
+	.word	5000
 	.cfi_endproc
 .LFE34:
 	.size	variable_delay, .-variable_delay
@@ -85,7 +118,7 @@ variable_delay:
 	.type	delay, %function
 delay:
 .LFB35:
-	.loc 1 47 0
+	.loc 1 54 0
 	.cfi_startproc
 	push	{r7, lr}
 	.cfi_def_cfa_offset 8
@@ -96,35 +129,33 @@ delay:
 	add	r7, sp, #0
 	.cfi_def_cfa_register 7
 	str	r0, [r7, #4]
-	.loc 1 49 0
-	ldr	r3, [r7, #4]
-	ldr	r2, .L9
-	mul	r3, r2
+	.loc 1 56 0
+	ldr	r2, [r7, #4]
+	mov	r3, r2
+	lsl	r3, r3, #5
+	sub	r3, r3, r2
+	lsl	r3, r3, #1
 	str	r3, [r7, #4]
-	.loc 1 50 0
+	.loc 1 57 0
 	mov	r3, #0
 	str	r3, [r7, #12]
-	b	.L7
-.L8:
-	.loc 1 51 0
+	b	.L10
+.L11:
+	.loc 1 58 0
 	ldr	r3, [r7, #12]
 	add	r3, r3, #1
 	str	r3, [r7, #12]
-.L7:
-	.loc 1 50 0 discriminator 1
+.L10:
+	.loc 1 57 0 discriminator 1
 	ldr	r2, [r7, #12]
 	ldr	r3, [r7, #4]
 	cmp	r2, r3
-	bls	.L8
-	.loc 1 53 0
+	bls	.L11
+	.loc 1 60 0
 	mov	sp, r7
 	add	sp, sp, #16
 	@ sp needed
 	pop	{r7, pc}
-.L10:
-	.align	2
-.L9:
-	.word	615
 	.cfi_endproc
 .LFE35:
 	.size	delay, .-delay
@@ -135,7 +166,7 @@ delay:
 	.type	initLEDs, %function
 initLEDs:
 .LFB36:
-	.loc 1 55 0
+	.loc 1 62 0
 	.cfi_startproc
 	push	{r7, lr}
 	.cfi_def_cfa_offset 8
@@ -143,81 +174,81 @@ initLEDs:
 	.cfi_offset 14, -4
 	add	r7, sp, #0
 	.cfi_def_cfa_register 7
-	.loc 1 56 0
-	ldr	r3, .L12
-	ldr	r2, .L12
+	.loc 1 63 0
+	ldr	r3, .L13
+	ldr	r2, .L13
 	ldr	r2, [r2, #20]
 	mov	r1, #128
 	lsl	r1, r1, #11
 	orr	r2, r1
 	str	r2, [r3, #20]
-	.loc 1 57 0
-	ldr	r3, .L12+4
-	ldr	r2, .L12+4
+	.loc 1 64 0
+	ldr	r3, .L13+4
+	ldr	r2, .L13+4
 	ldr	r2, [r2]
 	mov	r1, #1
 	orr	r2, r1
 	str	r2, [r3]
-	.loc 1 58 0
-	ldr	r3, .L12+4
-	ldr	r2, .L12+4
+	.loc 1 65 0
+	ldr	r3, .L13+4
+	ldr	r2, .L13+4
 	ldr	r2, [r2]
 	mov	r1, #4
 	orr	r2, r1
 	str	r2, [r3]
-	.loc 1 59 0
-	ldr	r3, .L12+4
-	ldr	r2, .L12+4
+	.loc 1 66 0
+	ldr	r3, .L13+4
+	ldr	r2, .L13+4
 	ldr	r2, [r2]
 	mov	r1, #16
 	orr	r2, r1
 	str	r2, [r3]
-	.loc 1 60 0
-	ldr	r3, .L12+4
-	ldr	r2, .L12+4
+	.loc 1 67 0
+	ldr	r3, .L13+4
+	ldr	r2, .L13+4
 	ldr	r2, [r2]
 	mov	r1, #64
 	orr	r2, r1
 	str	r2, [r3]
-	.loc 1 61 0
-	ldr	r3, .L12+4
-	ldr	r2, .L12+4
+	.loc 1 68 0
+	ldr	r3, .L13+4
+	ldr	r2, .L13+4
 	ldr	r2, [r2]
 	mov	r1, #128
 	lsl	r1, r1, #1
 	orr	r2, r1
 	str	r2, [r3]
-	.loc 1 62 0
-	ldr	r3, .L12+4
-	ldr	r2, .L12+4
+	.loc 1 69 0
+	ldr	r3, .L13+4
+	ldr	r2, .L13+4
 	ldr	r2, [r2]
 	mov	r1, #128
 	lsl	r1, r1, #3
 	orr	r2, r1
 	str	r2, [r3]
-	.loc 1 63 0
-	ldr	r3, .L12+4
-	ldr	r2, .L12+4
+	.loc 1 70 0
+	ldr	r3, .L13+4
+	ldr	r2, .L13+4
 	ldr	r2, [r2]
 	mov	r1, #128
 	lsl	r1, r1, #5
 	orr	r2, r1
 	str	r2, [r3]
-	.loc 1 64 0
-	ldr	r3, .L12+4
-	ldr	r2, .L12+4
+	.loc 1 71 0
+	ldr	r3, .L13+4
+	ldr	r2, .L13+4
 	ldr	r2, [r2]
 	mov	r1, #128
 	lsl	r1, r1, #7
 	orr	r2, r1
 	str	r2, [r3]
-	.loc 1 66 0
+	.loc 1 73 0
 	mov	sp, r7
 	@ sp needed
 	pop	{r7, pc}
-.L13:
+.L14:
 	.align	2
-.L12:
+.L13:
 	.word	1073876992
 	.word	1207960576
 	.cfi_endproc
@@ -230,7 +261,7 @@ initLEDs:
 	.type	initPB, %function
 initPB:
 .LFB37:
-	.loc 1 68 0
+	.loc 1 75 0
 	.cfi_startproc
 	push	{r7, lr}
 	.cfi_def_cfa_offset 8
@@ -238,15 +269,15 @@ initPB:
 	.cfi_offset 14, -4
 	add	r7, sp, #0
 	.cfi_def_cfa_register 7
-	.loc 1 69 0
-	ldr	r3, .L15
-	ldr	r2, .L15
+	.loc 1 76 0
+	ldr	r3, .L16
+	ldr	r2, .L16
 	ldr	r2, [r2, #20]
 	mov	r1, #128
 	lsl	r1, r1, #10
 	orr	r2, r1
 	str	r2, [r3, #20]
-	.loc 1 70 0
+	.loc 1 77 0
 	mov	r3, #144
 	lsl	r3, r3, #23
 	mov	r2, #144
@@ -255,7 +286,7 @@ initPB:
 	mov	r1, #1
 	orr	r2, r1
 	str	r2, [r3, #12]
-	.loc 1 71 0
+	.loc 1 78 0
 	mov	r3, #144
 	lsl	r3, r3, #23
 	mov	r2, #144
@@ -264,7 +295,7 @@ initPB:
 	mov	r1, #4
 	orr	r2, r1
 	str	r2, [r3, #12]
-	.loc 1 72 0
+	.loc 1 79 0
 	mov	r3, #144
 	lsl	r3, r3, #23
 	mov	r2, #144
@@ -273,7 +304,7 @@ initPB:
 	mov	r1, #16
 	orr	r2, r1
 	str	r2, [r3, #12]
-	.loc 1 73 0
+	.loc 1 80 0
 	mov	r3, #144
 	lsl	r3, r3, #23
 	mov	r2, #144
@@ -282,13 +313,13 @@ initPB:
 	mov	r1, #64
 	orr	r2, r1
 	str	r2, [r3, #12]
-	.loc 1 74 0
+	.loc 1 81 0
 	mov	sp, r7
 	@ sp needed
 	pop	{r7, pc}
-.L16:
+.L17:
 	.align	2
-.L15:
+.L16:
 	.word	1073876992
 	.cfi_endproc
 .LFE37:
@@ -300,7 +331,7 @@ initPB:
 	.type	initADCPot, %function
 initADCPot:
 .LFB38:
-	.loc 1 76 0
+	.loc 1 83 0
 	.cfi_startproc
 	push	{r7, lr}
 	.cfi_def_cfa_offset 8
@@ -311,42 +342,42 @@ initADCPot:
 	add	r7, sp, #0
 	.cfi_def_cfa_register 7
 	str	r0, [r7, #4]
-	.loc 1 77 0
-	ldr	r3, .L21
-	ldr	r2, .L21
+	.loc 1 84 0
+	ldr	r3, .L22
+	ldr	r2, .L22
 	ldr	r2, [r2, #20]
 	mov	r1, #128
 	lsl	r1, r1, #10
 	orr	r2, r1
 	str	r2, [r3, #20]
-	.loc 1 78 0
-	ldr	r3, .L21
-	ldr	r2, .L21
+	.loc 1 85 0
+	ldr	r3, .L22
+	ldr	r2, .L22
 	ldr	r2, [r2, #24]
 	mov	r1, #128
 	lsl	r1, r1, #2
 	orr	r2, r1
 	str	r2, [r3, #24]
-	.loc 1 79 0
-	ldr	r3, .L21+4
-	ldr	r2, .L21+4
+	.loc 1 86 0
+	ldr	r3, .L22+4
+	ldr	r2, .L22+4
 	ldr	r2, [r2, #8]
 	mov	r1, #1
 	orr	r2, r1
 	str	r2, [r3, #8]
-	.loc 1 80 0
+	.loc 1 87 0
 	mov	r8, r8
-.L18:
-	.loc 1 80 0 is_stmt 0 discriminator 1
-	ldr	r3, .L21+4
+.L19:
+	.loc 1 87 0 is_stmt 0 discriminator 1
+	ldr	r3, .L22+4
 	ldr	r3, [r3]
 	cmp	r3, #0
-	beq	.L18
-	.loc 1 82 0 is_stmt 1
+	beq	.L19
+	.loc 1 89 0 is_stmt 1
 	ldr	r3, [r7, #4]
 	cmp	r3, #0
-	bne	.L19
-	.loc 1 83 0
+	bne	.L20
+	.loc 1 90 0
 	mov	r3, #144
 	lsl	r3, r3, #23
 	mov	r2, #144
@@ -356,20 +387,20 @@ initADCPot:
 	lsl	r1, r1, #4
 	orr	r2, r1
 	str	r2, [r3]
-	.loc 1 84 0
-	ldr	r3, .L21+4
-	ldr	r2, .L21+4
+	.loc 1 91 0
+	ldr	r3, .L22+4
+	ldr	r2, .L22+4
 	ldr	r2, [r2, #40]
 	mov	r1, #32
 	orr	r2, r1
 	str	r2, [r3, #40]
-	b	.L20
-.L19:
-	.loc 1 87 0
+	b	.L21
+.L20:
+	.loc 1 94 0
 	ldr	r3, [r7, #4]
 	cmp	r3, #1
-	bne	.L20
-	.loc 1 88 0
+	bne	.L21
+	.loc 1 95 0
 	mov	r3, #144
 	lsl	r3, r3, #23
 	mov	r2, #144
@@ -379,29 +410,29 @@ initADCPot:
 	lsl	r1, r1, #6
 	orr	r2, r1
 	str	r2, [r3]
-	.loc 1 89 0
-	ldr	r3, .L21+4
-	ldr	r2, .L21+4
+	.loc 1 96 0
+	ldr	r3, .L22+4
+	ldr	r2, .L22+4
 	ldr	r2, [r2, #40]
 	mov	r1, #64
 	orr	r2, r1
 	str	r2, [r3, #40]
-.L20:
-	.loc 1 92 0
-	ldr	r3, .L21+4
-	ldr	r2, .L21+4
+.L21:
+	.loc 1 99 0
+	ldr	r3, .L22+4
+	ldr	r2, .L22+4
 	ldr	r2, [r2, #12]
 	mov	r1, #8
 	orr	r2, r1
 	str	r2, [r3, #12]
-	.loc 1 93 0
+	.loc 1 100 0
 	mov	sp, r7
 	add	sp, sp, #8
 	@ sp needed
 	pop	{r7, pc}
-.L22:
+.L23:
 	.align	2
-.L21:
+.L22:
 	.word	1073876992
 	.word	1073816576
 	.cfi_endproc
@@ -414,7 +445,7 @@ initADCPot:
 	.type	incrementLEDs, %function
 incrementLEDs:
 .LFB39:
-	.loc 1 95 0
+	.loc 1 102 0
 	.cfi_startproc
 	push	{r7, lr}
 	.cfi_def_cfa_offset 8
@@ -427,15 +458,15 @@ incrementLEDs:
 	mov	r2, r0
 	add	r3, r7, #7
 	strb	r2, [r3]
-	.loc 1 96 0
-	ldr	r3, .L24
+	.loc 1 103 0
+	ldr	r3, .L25
 	ldrh	r3, [r3, #20]
 	uxth	r2, r3
 	mov	r3, r7
 	add	r3, r3, #15
 	strb	r2, [r3]
-	.loc 1 97 0
-	ldr	r3, .L24
+	.loc 1 104 0
+	ldr	r3, .L25
 	add	r2, r7, #7
 	ldrb	r2, [r2]
 	sxtb	r2, r2
@@ -449,14 +480,14 @@ incrementLEDs:
 	uxth	r2, r2
 	uxth	r2, r2
 	strh	r2, [r3, #20]
-	.loc 1 98 0
+	.loc 1 105 0
 	mov	sp, r7
 	add	sp, sp, #16
 	@ sp needed
 	pop	{r7, pc}
-.L25:
+.L26:
 	.align	2
-.L24:
+.L25:
 	.word	1207960576
 	.cfi_endproc
 .LFE39:
@@ -468,7 +499,7 @@ incrementLEDs:
 	.type	getPot, %function
 getPot:
 .LFB40:
-	.loc 1 100 0
+	.loc 1 107 0
 	.cfi_startproc
 	push	{r7, lr}
 	.cfi_def_cfa_offset 8
@@ -478,43 +509,43 @@ getPot:
 	.cfi_def_cfa_offset 16
 	add	r7, sp, #0
 	.cfi_def_cfa_register 7
-	.loc 1 101 0
+	.loc 1 108 0
 	add	r3, r7, #6
 	mov	r2, #0
 	strh	r2, [r3]
-	.loc 1 102 0
-	ldr	r3, .L29
-	ldr	r2, .L29
+	.loc 1 109 0
+	ldr	r3, .L30
+	ldr	r2, .L30
 	ldr	r2, [r2, #8]
 	mov	r1, #4
 	orr	r2, r1
 	str	r2, [r3, #8]
-	.loc 1 103 0
+	.loc 1 110 0
 	mov	r8, r8
-.L27:
-	.loc 1 103 0 is_stmt 0 discriminator 1
-	ldr	r3, .L29
+.L28:
+	.loc 1 110 0 is_stmt 0 discriminator 1
+	ldr	r3, .L30
 	ldr	r3, [r3, #4]
 	cmp	r3, #0
-	bne	.L27
-	.loc 1 104 0 is_stmt 1
-	ldr	r3, .L29
+	bne	.L28
+	.loc 1 111 0 is_stmt 1
+	ldr	r3, .L30
 	ldr	r2, [r3, #64]
 	add	r3, r7, #6
 	strh	r2, [r3]
-	.loc 1 106 0
+	.loc 1 113 0
 	add	r3, r7, #6
 	ldrh	r3, [r3]
 	sxth	r3, r3
-	.loc 1 107 0
+	.loc 1 114 0
 	mov	r0, r3
 	mov	sp, r7
 	add	sp, sp, #8
 	@ sp needed
 	pop	{r7, pc}
-.L30:
+.L31:
 	.align	2
-.L29:
+.L30:
 	.word	1073816576
 	.cfi_endproc
 .LFE40:
@@ -526,7 +557,7 @@ getPot:
 	.type	getPB, %function
 getPB:
 .LFB41:
-	.loc 1 109 0
+	.loc 1 116 0
 	.cfi_startproc
 	push	{r7, lr}
 	.cfi_def_cfa_offset 8
@@ -537,16 +568,16 @@ getPB:
 	add	r7, sp, #0
 	.cfi_def_cfa_register 7
 	str	r0, [r7, #4]
-	.loc 1 110 0
+	.loc 1 117 0
 	mov	r3, r7
 	add	r3, r3, #15
 	mov	r2, #0
 	strb	r2, [r3]
-	.loc 1 111 0
+	.loc 1 118 0
 	ldr	r3, [r7, #4]
 	cmp	r3, #0
-	bne	.L32
-	.loc 1 112 0
+	bne	.L33
+	.loc 1 119 0
 	mov	r3, #144
 	lsl	r3, r3, #23
 	ldrh	r3, [r3, #16]
@@ -560,13 +591,13 @@ getPB:
 	mov	r3, r7
 	add	r3, r3, #15
 	strb	r2, [r3]
-	b	.L33
-.L32:
-	.loc 1 114 0
+	b	.L34
+.L33:
+	.loc 1 121 0
 	ldr	r3, [r7, #4]
 	cmp	r3, #1
-	bne	.L34
-	.loc 1 115 0
+	bne	.L35
+	.loc 1 122 0
 	mov	r3, #144
 	lsl	r3, r3, #23
 	ldrh	r3, [r3, #16]
@@ -580,13 +611,13 @@ getPB:
 	mov	r2, #2
 	and	r2, r1
 	strb	r2, [r3]
-	b	.L33
-.L34:
-	.loc 1 117 0
+	b	.L34
+.L35:
+	.loc 1 124 0
 	ldr	r3, [r7, #4]
 	cmp	r3, #2
-	bne	.L35
-	.loc 1 118 0
+	bne	.L36
+	.loc 1 125 0
 	mov	r3, #144
 	lsl	r3, r3, #23
 	ldrh	r3, [r3, #16]
@@ -600,13 +631,13 @@ getPB:
 	mov	r2, #4
 	and	r2, r1
 	strb	r2, [r3]
-	b	.L33
-.L35:
-	.loc 1 120 0
+	b	.L34
+.L36:
+	.loc 1 127 0
 	ldr	r3, [r7, #4]
 	cmp	r3, #3
-	bne	.L33
-	.loc 1 121 0
+	bne	.L34
+	.loc 1 128 0
 	mov	r3, #144
 	lsl	r3, r3, #23
 	ldrh	r3, [r3, #16]
@@ -620,13 +651,13 @@ getPB:
 	mov	r2, #8
 	and	r2, r1
 	strb	r2, [r3]
-.L33:
-	.loc 1 124 0
+.L34:
+	.loc 1 131 0
 	mov	r3, r7
 	add	r3, r3, #15
 	ldrb	r3, [r3]
 	sxtb	r3, r3
-	.loc 1 125 0
+	.loc 1 132 0
 	mov	r0, r3
 	mov	sp, r7
 	add	sp, sp, #16
@@ -641,7 +672,7 @@ getPB:
 	.file 4 "./Libraries/stm32f0xx.h"
 	.section	.debug_info,"",%progbits
 .Ldebug_info0:
-	.4byte	0x48a
+	.4byte	0x49d
 	.2byte	0x4
 	.4byte	.Ldebug_abbrev0
 	.byte	0x4
@@ -1061,137 +1092,147 @@ getPB:
 	.uleb128 0xf
 	.4byte	.LASF47
 	.byte	0x1
-	.byte	0x22
+	.byte	0x2b
 	.4byte	.LFB34
 	.4byte	.LFE34-.LFB34
 	.uleb128 0x1
 	.byte	0x9c
+	.4byte	0x39e
 	.uleb128 0x10
 	.4byte	.LASF49
 	.byte	0x1
-	.byte	0x2f
-	.4byte	.LFB35
-	.4byte	.LFE35-.LFB35
-	.uleb128 0x1
-	.byte	0x9c
-	.4byte	0x3bb
-	.uleb128 0x11
-	.4byte	.LASF51
-	.byte	0x1
-	.byte	0x2f
-	.4byte	0xb8
-	.uleb128 0x2
-	.byte	0x91
-	.sleb128 -20
-	.uleb128 0x12
-	.ascii	"i\000"
-	.byte	0x1
-	.byte	0x30
-	.4byte	0xb8
-	.uleb128 0x2
-	.byte	0x91
-	.sleb128 -12
-	.byte	0
-	.uleb128 0x13
-	.4byte	.LASF63
-	.byte	0x1
-	.byte	0x37
-	.4byte	.LFB36
-	.4byte	.LFE36-.LFB36
-	.uleb128 0x1
-	.byte	0x9c
-	.uleb128 0xf
-	.4byte	.LASF48
-	.byte	0x1
-	.byte	0x44
-	.4byte	.LFB37
-	.4byte	.LFE37-.LFB37
-	.uleb128 0x1
-	.byte	0x9c
-	.uleb128 0x10
-	.4byte	.LASF50
-	.byte	0x1
-	.byte	0x4c
-	.4byte	.LFB38
-	.4byte	.LFE38-.LFB38
-	.uleb128 0x1
-	.byte	0x9c
-	.4byte	0x401
-	.uleb128 0x14
-	.ascii	"POT\000"
-	.byte	0x1
-	.byte	0x4c
+	.byte	0x2c
 	.4byte	0x89
 	.uleb128 0x2
 	.byte	0x91
 	.sleb128 -12
 	.byte	0
-	.uleb128 0x10
+	.uleb128 0x11
+	.4byte	.LASF48
+	.byte	0x1
+	.byte	0x36
+	.4byte	.LFB35
+	.4byte	.LFE35-.LFB35
+	.uleb128 0x1
+	.byte	0x9c
+	.4byte	0x3ce
+	.uleb128 0x12
+	.4byte	.LASF51
+	.byte	0x1
+	.byte	0x36
+	.4byte	0xb8
+	.uleb128 0x2
+	.byte	0x91
+	.sleb128 -20
+	.uleb128 0x13
+	.ascii	"i\000"
+	.byte	0x1
+	.byte	0x37
+	.4byte	0xb8
+	.uleb128 0x2
+	.byte	0x91
+	.sleb128 -12
+	.byte	0
+	.uleb128 0x14
+	.4byte	.LASF63
+	.byte	0x1
+	.byte	0x3e
+	.4byte	.LFB36
+	.4byte	.LFE36-.LFB36
+	.uleb128 0x1
+	.byte	0x9c
+	.uleb128 0x15
+	.4byte	.LASF64
+	.byte	0x1
+	.byte	0x4b
+	.4byte	.LFB37
+	.4byte	.LFE37-.LFB37
+	.uleb128 0x1
+	.byte	0x9c
+	.uleb128 0x11
+	.4byte	.LASF50
+	.byte	0x1
+	.byte	0x53
+	.4byte	.LFB38
+	.4byte	.LFE38-.LFB38
+	.uleb128 0x1
+	.byte	0x9c
+	.4byte	0x414
+	.uleb128 0x16
+	.ascii	"POT\000"
+	.byte	0x1
+	.byte	0x53
+	.4byte	0x89
+	.uleb128 0x2
+	.byte	0x91
+	.sleb128 -12
+	.byte	0
+	.uleb128 0x11
 	.4byte	.LASF52
 	.byte	0x1
-	.byte	0x5f
+	.byte	0x66
 	.4byte	.LFB39
 	.4byte	.LFE39-.LFB39
 	.uleb128 0x1
 	.byte	0x9c
-	.4byte	0x433
-	.uleb128 0x11
+	.4byte	0x446
+	.uleb128 0x12
 	.4byte	.LASF53
 	.byte	0x1
-	.byte	0x5f
+	.byte	0x66
 	.4byte	0x97
 	.uleb128 0x2
 	.byte	0x91
 	.sleb128 -17
-	.uleb128 0x15
+	.uleb128 0x10
 	.4byte	.LASF54
 	.byte	0x1
-	.byte	0x60
+	.byte	0x67
 	.4byte	0x97
 	.uleb128 0x2
 	.byte	0x91
 	.sleb128 -9
 	.byte	0
-	.uleb128 0x16
-	.4byte	.LASF64
+	.uleb128 0x17
+	.4byte	.LASF65
 	.byte	0x1
-	.byte	0x64
+	.byte	0x6b
 	.4byte	0xa2
 	.4byte	.LFB40
 	.4byte	.LFE40-.LFB40
 	.uleb128 0x1
 	.byte	0x9c
-	.4byte	0x45b
-	.uleb128 0x15
+	.4byte	0x46e
+	.uleb128 0x10
 	.4byte	.LASF55
 	.byte	0x1
-	.byte	0x65
+	.byte	0x6c
 	.4byte	0xa2
 	.uleb128 0x2
 	.byte	0x91
 	.sleb128 -10
 	.byte	0
-	.uleb128 0x17
+	.uleb128 0x18
 	.4byte	.LASF56
 	.byte	0x1
-	.byte	0x6d
+	.byte	0x74
 	.4byte	0x97
 	.4byte	.LFB41
 	.4byte	.LFE41-.LFB41
 	.uleb128 0x1
 	.byte	0x9c
-	.uleb128 0x11
+	.uleb128 0x12
 	.4byte	.LASF57
 	.byte	0x1
-	.byte	0x6d
+	.byte	0x74
 	.4byte	0x89
 	.uleb128 0x2
 	.byte	0x91
 	.sleb128 -20
-	.uleb128 0x15
+	.uleb128 0x10
 	.4byte	.LASF55
 	.byte	0x1
-	.byte	0x6e
+	.byte	0x75
 	.4byte	0x97
 	.uleb128 0x2
 	.byte	0x91
@@ -1386,7 +1427,7 @@ getPB:
 	.byte	0
 	.uleb128 0xf
 	.uleb128 0x2e
-	.byte	0
+	.byte	0x1
 	.uleb128 0x3f
 	.uleb128 0x19
 	.uleb128 0x3
@@ -1403,11 +1444,28 @@ getPB:
 	.uleb128 0x6
 	.uleb128 0x40
 	.uleb128 0x18
-	.uleb128 0x2117
+	.uleb128 0x2116
 	.uleb128 0x19
+	.uleb128 0x1
+	.uleb128 0x13
 	.byte	0
 	.byte	0
 	.uleb128 0x10
+	.uleb128 0x34
+	.byte	0
+	.uleb128 0x3
+	.uleb128 0xe
+	.uleb128 0x3a
+	.uleb128 0xb
+	.uleb128 0x3b
+	.uleb128 0xb
+	.uleb128 0x49
+	.uleb128 0x13
+	.uleb128 0x2
+	.uleb128 0x18
+	.byte	0
+	.byte	0
+	.uleb128 0x11
 	.uleb128 0x2e
 	.byte	0x1
 	.uleb128 0x3f
@@ -1432,7 +1490,7 @@ getPB:
 	.uleb128 0x13
 	.byte	0
 	.byte	0
-	.uleb128 0x11
+	.uleb128 0x12
 	.uleb128 0x5
 	.byte	0
 	.uleb128 0x3
@@ -1447,7 +1505,7 @@ getPB:
 	.uleb128 0x18
 	.byte	0
 	.byte	0
-	.uleb128 0x12
+	.uleb128 0x13
 	.uleb128 0x34
 	.byte	0
 	.uleb128 0x3
@@ -1460,30 +1518,53 @@ getPB:
 	.uleb128 0x13
 	.uleb128 0x2
 	.uleb128 0x18
-	.byte	0
-	.byte	0
-	.uleb128 0x13
-	.uleb128 0x2e
-	.byte	0
-	.uleb128 0x3f
-	.uleb128 0x19
-	.uleb128 0x3
-	.uleb128 0xe
-	.uleb128 0x3a
-	.uleb128 0xb
-	.uleb128 0x3b
-	.uleb128 0xb
-	.uleb128 0x11
-	.uleb128 0x1
-	.uleb128 0x12
-	.uleb128 0x6
-	.uleb128 0x40
-	.uleb128 0x18
-	.uleb128 0x2117
-	.uleb128 0x19
 	.byte	0
 	.byte	0
 	.uleb128 0x14
+	.uleb128 0x2e
+	.byte	0
+	.uleb128 0x3f
+	.uleb128 0x19
+	.uleb128 0x3
+	.uleb128 0xe
+	.uleb128 0x3a
+	.uleb128 0xb
+	.uleb128 0x3b
+	.uleb128 0xb
+	.uleb128 0x11
+	.uleb128 0x1
+	.uleb128 0x12
+	.uleb128 0x6
+	.uleb128 0x40
+	.uleb128 0x18
+	.uleb128 0x2117
+	.uleb128 0x19
+	.byte	0
+	.byte	0
+	.uleb128 0x15
+	.uleb128 0x2e
+	.byte	0
+	.uleb128 0x3f
+	.uleb128 0x19
+	.uleb128 0x3
+	.uleb128 0xe
+	.uleb128 0x3a
+	.uleb128 0xb
+	.uleb128 0x3b
+	.uleb128 0xb
+	.uleb128 0x27
+	.uleb128 0x19
+	.uleb128 0x11
+	.uleb128 0x1
+	.uleb128 0x12
+	.uleb128 0x6
+	.uleb128 0x40
+	.uleb128 0x18
+	.uleb128 0x2117
+	.uleb128 0x19
+	.byte	0
+	.byte	0
+	.uleb128 0x16
 	.uleb128 0x5
 	.byte	0
 	.uleb128 0x3
@@ -1498,22 +1579,7 @@ getPB:
 	.uleb128 0x18
 	.byte	0
 	.byte	0
-	.uleb128 0x15
-	.uleb128 0x34
-	.byte	0
-	.uleb128 0x3
-	.uleb128 0xe
-	.uleb128 0x3a
-	.uleb128 0xb
-	.uleb128 0x3b
-	.uleb128 0xb
-	.uleb128 0x49
-	.uleb128 0x13
-	.uleb128 0x2
-	.uleb128 0x18
-	.byte	0
-	.byte	0
-	.uleb128 0x16
+	.uleb128 0x17
 	.uleb128 0x2e
 	.byte	0x1
 	.uleb128 0x3f
@@ -1540,7 +1606,7 @@ getPB:
 	.uleb128 0x13
 	.byte	0
 	.byte	0
-	.uleb128 0x17
+	.uleb128 0x18
 	.uleb128 0x2e
 	.byte	0x1
 	.uleb128 0x3f
@@ -1591,7 +1657,7 @@ getPB:
 	.ascii	"POTSEL\000"
 .LASF57:
 	.ascii	"button\000"
-.LASF64:
+.LASF65:
 	.ascii	"getPot\000"
 .LASF28:
 	.ascii	"OTYPER\000"
@@ -1603,7 +1669,7 @@ getPB:
 	.ascii	"SMPR\000"
 .LASF2:
 	.ascii	"__int8_t\000"
-.LASF48:
+.LASF64:
 	.ascii	"initPB\000"
 .LASF14:
 	.ascii	"int16_t\000"
@@ -1672,7 +1738,7 @@ getPB:
 	.ascii	"present\000"
 .LASF1:
 	.ascii	"unsigned char\000"
-.LASF49:
+.LASF48:
 	.ascii	"delay\000"
 .LASF4:
 	.ascii	"short int\000"
@@ -1704,6 +1770,8 @@ getPB:
 	.ascii	"CFGR2\000"
 .LASF43:
 	.ascii	"CFGR3\000"
+.LASF49:
+	.ascii	"varDelay\000"
 .LASF35:
 	.ascii	"CFGR\000"
 .LASF62:

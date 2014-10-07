@@ -27,28 +27,32 @@ int main(void) {
 
   for(EVER) {
     if (getPB(3)) {
-      
+      incrementLEDs(-1);
     }
+    else {
+      incrementLEDs(1);
+    }
+
+    variable_delay();
   }
-  return 0;  // keep compiler happy. 
+  
+  return 0;
 }
 
 void variable_delay(void) {
-    // check if SW2 is held down. If so:
-        // kick off conversion
-        // wait for conversion complete. This can be done using a WHILE loop which keeps looping while the EOC flag is 0.
-        // do some operation to the data available in the ADC_DR to scale it to the required timing
-    // if not:
-        // set loop iterations to a fixed amount producing a delay of 0.5 s
+    int varDelay = 5000;
+    if (getPB(2)) {
+      varDelay = (4*getPot()) + 1000;
+    }
 
-    // run a FOR loop, where the number of iterations is set by the value calculated above. 
+    delay(varDelay);
 }
 
 /* WOODBOX FUNCTIONS ------------------------------------------------------------------------------ */
 
 void delay(uint32_t length) {
   uint32_t i;
-  length = length * 615; // Scaling to get 1 ms input parameter (length)
+  length = length * 62; // Scaling to get 0.1 ms input parameter (length)
   for (i = 0; i <= length;) { // Do nothing really
     i++;
   }
@@ -91,7 +95,7 @@ void initADCPot(int POT) {
     ADC1 -> CHSELR |= ADC_CHSELR_CHSEL6;  // Select ADC channel as CHANNEL 6
   }
 
-  ADC1 -> CFGR1 |= ADC_CFGR1_RES_0; // Set resolution to 10-bits
+  ADC1 -> CFGR1 |= (ADC_CFGR1_RES_0); // Set resolution to 10-bits
 }
 
 void incrementLEDs(int8_t amount) { // Increment the LEDs by the specified value
