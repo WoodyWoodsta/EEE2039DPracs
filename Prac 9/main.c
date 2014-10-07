@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include "stm32f0xx.h"
+#include "eeprom_lib.h"
 
 #define EVER ;;
 
@@ -18,12 +19,18 @@ void incrementLEDs(int8_t amount);
 int16_t getPot(void);
 int8_t getPB(int button);
 
+static uint32_t check_for_eeprom_magic(void); // will return 1 if magic found
+static void write_magic_to_eeprom(void);
+
+
 int main(void) {
 
   initLEDs();
   initPB();
   initADCPot(POT1);
+  eeprom_init_spi();
 
+  GPIOB -> ODR = eeprom_read_from_address(0x0);
 
   for(EVER) {
     if (getPB(3)) {
@@ -101,6 +108,7 @@ void initADCPot(int POT) {
 void incrementLEDs(int8_t amount) { // Increment the LEDs by the specified value
   int8_t present = GPIOB -> ODR;
   GPIOB -> ODR = amount + present;
+  eeprom_write_to_address(0x0, amount + present);
 }
 
 int16_t getPot(void) {
