@@ -14,19 +14,6 @@
 	.text
 .Ltext0:
 	.cfi_sections	.debug_frame
-	.global	RCC_AHBENR_IOPBEN
-	.data
-	.align	2
-	.type	RCC_AHBENR_IOPBEN, %object
-	.size	RCC_AHBENR_IOPBEN, 4
-RCC_AHBENR_IOPBEN:
-	.word	262144
-	.global	GPIOB_MODER_OUTPUT
-	.align	2
-	.type	GPIOB_MODER_OUTPUT, %object
-	.size	GPIOB_MODER_OUTPUT, 4
-GPIOB_MODER_OUTPUT:
-	.word	21845
 	.section	.rodata
 	.align	2
 .LC0:
@@ -79,7 +66,7 @@ GPIOB_MODER_OUTPUT:
 main:
 .LFB0:
 	.file 1 "main.c"
-	.loc 1 24 0
+	.loc 1 18 0
 	.cfi_startproc
 	push	{r7, lr}
 	.cfi_def_cfa_offset 8
@@ -89,7 +76,7 @@ main:
 	.cfi_def_cfa_offset 56
 	add	r7, sp, #0
 	.cfi_def_cfa_register 7
-	.loc 1 26 0
+	.loc 1 20 0
 	mov	r2, r7
 	add	r2, r2, #8
 	ldr	r3, .L3
@@ -100,19 +87,19 @@ main:
 	mov	r1, r2
 	mov	r2, r3
 	bl	memcpy
-	.loc 1 27 0
+	.loc 1 21 0
 	mov	r3, r7
 	add	r3, r3, #8
 	ldrb	r2, [r3]
 	add	r3, r7, #7
 	strb	r2, [r3]
-	.loc 1 28 0
+	.loc 1 22 0
 	mov	r3, r7
 	add	r3, r3, #8
 	ldrb	r2, [r3]
 	add	r3, r7, #6
 	strb	r2, [r3]
-	.loc 1 31 0
+	.loc 1 25 0
 	mov	r1, r7
 	add	r1, r1, #8
 	add	r2, r7, #6
@@ -120,32 +107,32 @@ main:
 	mov	r0, r1
 	mov	r1, #40
 	bl	find_min_max
-	.loc 1 32 0
+	.loc 1 26 0
 	bl	initLEDs
 .L2:
-	.loc 1 36 0 discriminator 1
+	.loc 1 30 0 discriminator 1
 	ldr	r3, .L3+4
 	add	r2, r7, #7
 	ldrb	r2, [r2]
 	sxtb	r2, r2
 	str	r2, [r3]
-	.loc 1 37 0 discriminator 1
+	.loc 1 31 0 discriminator 1
 	mov	r3, #250
 	lsl	r3, r3, #2
 	mov	r0, r3
 	bl	delay
-	.loc 1 38 0 discriminator 1
+	.loc 1 32 0 discriminator 1
 	ldr	r3, .L3+4
 	add	r2, r7, #6
 	ldrb	r2, [r2]
 	sxtb	r2, r2
 	str	r2, [r3]
-	.loc 1 39 0 discriminator 1
+	.loc 1 33 0 discriminator 1
 	mov	r3, #250
 	lsl	r3, r3, #2
 	mov	r0, r3
 	bl	delay
-	.loc 1 40 0 discriminator 1
+	.loc 1 34 0 discriminator 1
 	b	.L2
 .L4:
 	.align	2
@@ -162,7 +149,7 @@ main:
 	.type	find_min_max, %function
 find_min_max:
 .LFB1:
-	.loc 1 48 0
+	.loc 1 42 0
 	.cfi_startproc
 	push	{r7, lr}
 	.cfi_def_cfa_offset 8
@@ -176,14 +163,14 @@ find_min_max:
 	str	r1, [r7, #8]
 	str	r2, [r7, #4]
 	str	r3, [r7]
-	.loc 1 50 0
+	.loc 1 44 0
 	mov	r3, r7
 	add	r3, r3, #22
 	mov	r2, #0
 	strh	r2, [r3]
 	b	.L6
 .L9:
-	.loc 1 51 0
+	.loc 1 45 0
 	mov	r3, r7
 	add	r3, r3, #22
 	ldrh	r3, [r3]
@@ -196,7 +183,7 @@ find_min_max:
 	sxtb	r3, r3
 	cmp	r2, r3
 	ble	.L7
-	.loc 1 51 0 is_stmt 0 discriminator 1
+	.loc 1 45 0 is_stmt 0 discriminator 1
 	mov	r3, r7
 	add	r3, r3, #22
 	ldrh	r3, [r3]
@@ -206,7 +193,7 @@ find_min_max:
 	ldr	r3, [r7, #4]
 	strb	r2, [r3]
 .L7:
-	.loc 1 52 0 is_stmt 1
+	.loc 1 46 0 is_stmt 1
 	mov	r3, r7
 	add	r3, r3, #22
 	ldrh	r3, [r3]
@@ -219,7 +206,7 @@ find_min_max:
 	sxtb	r3, r3
 	cmp	r2, r3
 	bge	.L8
-	.loc 1 52 0 is_stmt 0 discriminator 1
+	.loc 1 46 0 is_stmt 0 discriminator 1
 	mov	r3, r7
 	add	r3, r3, #22
 	ldrh	r3, [r3]
@@ -229,7 +216,7 @@ find_min_max:
 	ldr	r3, [r7]
 	strb	r2, [r3]
 .L8:
-	.loc 1 50 0 is_stmt 1
+	.loc 1 44 0 is_stmt 1
 	mov	r3, r7
 	add	r3, r3, #22
 	ldrh	r2, [r3]
@@ -238,14 +225,14 @@ find_min_max:
 	add	r2, r2, #1
 	strh	r2, [r3]
 .L6:
-	.loc 1 50 0 is_stmt 0 discriminator 1
+	.loc 1 44 0 is_stmt 0 discriminator 1
 	mov	r3, r7
 	add	r3, r3, #22
 	ldrh	r2, [r3]
 	ldr	r3, [r7, #8]
 	cmp	r2, r3
 	bcc	.L9
-	.loc 1 54 0 is_stmt 1
+	.loc 1 48 0 is_stmt 1
 	mov	sp, r7
 	add	sp, sp, #24
 	@ sp needed
@@ -260,7 +247,7 @@ find_min_max:
 	.type	delay, %function
 delay:
 .LFB2:
-	.loc 1 56 0
+	.loc 1 50 0
 	.cfi_startproc
 	push	{r7, lr}
 	.cfi_def_cfa_offset 8
@@ -271,27 +258,27 @@ delay:
 	add	r7, sp, #0
 	.cfi_def_cfa_register 7
 	str	r0, [r7, #4]
-	.loc 1 58 0
+	.loc 1 52 0
 	ldr	r3, [r7, #4]
 	ldr	r2, .L13
 	mul	r3, r2
 	str	r3, [r7, #4]
-	.loc 1 59 0
+	.loc 1 53 0
 	mov	r3, #0
 	str	r3, [r7, #12]
 	b	.L11
 .L12:
-	.loc 1 60 0
+	.loc 1 54 0
 	ldr	r3, [r7, #12]
 	add	r3, r3, #1
 	str	r3, [r7, #12]
 .L11:
-	.loc 1 59 0 discriminator 1
+	.loc 1 53 0 discriminator 1
 	ldr	r2, [r7, #12]
 	ldr	r3, [r7, #4]
 	cmp	r2, r3
 	bls	.L12
-	.loc 1 62 0
+	.loc 1 56 0
 	mov	sp, r7
 	add	sp, sp, #16
 	@ sp needed
@@ -310,7 +297,7 @@ delay:
 	.type	initLEDs, %function
 initLEDs:
 .LFB3:
-	.loc 1 64 0
+	.loc 1 58 0
 	.cfi_startproc
 	push	{r7, lr}
 	.cfi_def_cfa_offset 8
@@ -318,23 +305,22 @@ initLEDs:
 	.cfi_offset 14, -4
 	add	r7, sp, #0
 	.cfi_def_cfa_register 7
-	.loc 1 65 0
+	.loc 1 59 0
 	ldr	r3, .L16
 	ldr	r2, .L16
-	ldr	r1, [r2]
+	ldr	r2, [r2]
+	mov	r1, #128
+	lsl	r1, r1, #11
+	orr	r2, r1
+	str	r2, [r3]
+	.loc 1 60 0
+	ldr	r3, .L16+4
 	ldr	r2, .L16+4
 	ldr	r2, [r2]
+	ldr	r1, .L16+8
 	orr	r2, r1
 	str	r2, [r3]
-	.loc 1 66 0
-	ldr	r3, .L16+8
-	ldr	r2, .L16+8
-	ldr	r1, [r2]
-	ldr	r2, .L16+12
-	ldr	r2, [r2]
-	orr	r2, r1
-	str	r2, [r3]
-	.loc 1 67 0
+	.loc 1 61 0
 	mov	sp, r7
 	@ sp needed
 	pop	{r7, pc}
@@ -342,9 +328,8 @@ initLEDs:
 	.align	2
 .L16:
 	.word	1073877012
-	.word	RCC_AHBENR_IOPBEN
 	.word	1207960576
-	.word	GPIOB_MODER_OUTPUT
+	.word	21845
 	.cfi_endproc
 .LFE3:
 	.size	initLEDs, .-initLEDs
@@ -353,15 +338,15 @@ initLEDs:
 	.file 3 "c:\\program files\\gnu tools arm embedded\\4.8 2014q2\\arm-none-eabi\\include\\stdint.h"
 	.section	.debug_info,"",%progbits
 .Ldebug_info0:
-	.4byte	0x1c8
+	.4byte	0x1a6
 	.2byte	0x4
 	.4byte	.Ldebug_abbrev0
 	.byte	0x4
 	.uleb128 0x1
-	.4byte	.LASF24
+	.4byte	.LASF22
 	.byte	0x1
-	.4byte	.LASF25
-	.4byte	.LASF26
+	.4byte	.LASF23
+	.4byte	.LASF24
 	.4byte	.Ltext0
 	.4byte	.Letext0-.Ltext0
 	.4byte	.Ldebug_line0
@@ -436,9 +421,9 @@ initLEDs:
 	.byte	0x42
 	.4byte	0x5e
 	.uleb128 0x5
-	.4byte	.LASF27
+	.4byte	.LASF25
 	.byte	0x1
-	.byte	0x18
+	.byte	0x12
 	.4byte	0x7e
 	.4byte	.LFB0
 	.4byte	.LFE0-.LFB0
@@ -448,7 +433,7 @@ initLEDs:
 	.uleb128 0x6
 	.4byte	.LASF15
 	.byte	0x1
-	.byte	0x1a
+	.byte	0x14
 	.4byte	0xf1
 	.uleb128 0x2
 	.byte	0x91
@@ -456,7 +441,7 @@ initLEDs:
 	.uleb128 0x7
 	.ascii	"min\000"
 	.byte	0x1
-	.byte	0x1b
+	.byte	0x15
 	.4byte	0x8c
 	.uleb128 0x2
 	.byte	0x91
@@ -464,7 +449,7 @@ initLEDs:
 	.uleb128 0x7
 	.ascii	"max\000"
 	.byte	0x1
-	.byte	0x1c
+	.byte	0x16
 	.4byte	0x8c
 	.uleb128 0x2
 	.byte	0x91
@@ -484,7 +469,7 @@ initLEDs:
 	.uleb128 0xa
 	.4byte	.LASF20
 	.byte	0x1
-	.byte	0x30
+	.byte	0x2a
 	.4byte	.LFB1
 	.4byte	.LFE1-.LFB1
 	.uleb128 0x1
@@ -493,7 +478,7 @@ initLEDs:
 	.uleb128 0xb
 	.4byte	.LASF15
 	.byte	0x1
-	.byte	0x30
+	.byte	0x2a
 	.4byte	0x162
 	.uleb128 0x2
 	.byte	0x91
@@ -501,7 +486,7 @@ initLEDs:
 	.uleb128 0xb
 	.4byte	.LASF17
 	.byte	0x1
-	.byte	0x30
+	.byte	0x2a
 	.4byte	0xa2
 	.uleb128 0x2
 	.byte	0x91
@@ -509,7 +494,7 @@ initLEDs:
 	.uleb128 0xb
 	.4byte	.LASF18
 	.byte	0x1
-	.byte	0x30
+	.byte	0x2a
 	.4byte	0x162
 	.uleb128 0x2
 	.byte	0x91
@@ -517,7 +502,7 @@ initLEDs:
 	.uleb128 0xb
 	.4byte	.LASF19
 	.byte	0x1
-	.byte	0x30
+	.byte	0x2a
 	.4byte	0x162
 	.uleb128 0x2
 	.byte	0x91
@@ -525,7 +510,7 @@ initLEDs:
 	.uleb128 0x7
 	.ascii	"i\000"
 	.byte	0x1
-	.byte	0x31
+	.byte	0x2b
 	.4byte	0x97
 	.uleb128 0x2
 	.byte	0x91
@@ -537,7 +522,7 @@ initLEDs:
 	.uleb128 0xa
 	.4byte	.LASF21
 	.byte	0x1
-	.byte	0x38
+	.byte	0x32
 	.4byte	.LFB2
 	.4byte	.LFE2-.LFB2
 	.uleb128 0x1
@@ -546,7 +531,7 @@ initLEDs:
 	.uleb128 0xb
 	.4byte	.LASF17
 	.byte	0x1
-	.byte	0x38
+	.byte	0x32
 	.4byte	0xa2
 	.uleb128 0x2
 	.byte	0x91
@@ -554,36 +539,20 @@ initLEDs:
 	.uleb128 0x7
 	.ascii	"i\000"
 	.byte	0x1
-	.byte	0x39
+	.byte	0x33
 	.4byte	0xa2
 	.uleb128 0x2
 	.byte	0x91
 	.sleb128 -12
 	.byte	0
 	.uleb128 0xd
-	.4byte	.LASF28
+	.4byte	.LASF26
 	.byte	0x1
-	.byte	0x40
+	.byte	0x3a
 	.4byte	.LFB3
 	.4byte	.LFE3-.LFB3
 	.uleb128 0x1
 	.byte	0x9c
-	.uleb128 0xe
-	.4byte	.LASF22
-	.byte	0x1
-	.byte	0x14
-	.4byte	0xa2
-	.uleb128 0x5
-	.byte	0x3
-	.4byte	RCC_AHBENR_IOPBEN
-	.uleb128 0xe
-	.4byte	.LASF23
-	.byte	0x1
-	.byte	0x15
-	.4byte	0xa2
-	.uleb128 0x5
-	.byte	0x3
-	.4byte	GPIOB_MODER_OUTPUT
 	.byte	0
 	.section	.debug_abbrev,"",%progbits
 .Ldebug_abbrev0:
@@ -786,23 +755,6 @@ initLEDs:
 	.uleb128 0x19
 	.byte	0
 	.byte	0
-	.uleb128 0xe
-	.uleb128 0x34
-	.byte	0
-	.uleb128 0x3
-	.uleb128 0xe
-	.uleb128 0x3a
-	.uleb128 0xb
-	.uleb128 0x3b
-	.uleb128 0xb
-	.uleb128 0x49
-	.uleb128 0x13
-	.uleb128 0x3f
-	.uleb128 0x19
-	.uleb128 0x2
-	.uleb128 0x18
-	.byte	0
-	.byte	0
 	.byte	0
 	.section	.debug_aranges,"",%progbits
 	.4byte	0x1c
@@ -821,11 +773,9 @@ initLEDs:
 	.section	.debug_str,"MS",%progbits,1
 .LASF3:
 	.ascii	"__int8_t\000"
-.LASF23:
-	.ascii	"GPIOB_MODER_OUTPUT\000"
 .LASF20:
 	.ascii	"find_min_max\000"
-.LASF24:
+.LASF22:
 	.ascii	"GNU C 4.8.4 20140526 (release) [ARM/embedded-4_8-br"
 	.ascii	"anch revision 211358] -mthumb -mcpu=cortex-m0 -g\000"
 .LASF12:
@@ -844,26 +794,24 @@ initLEDs:
 	.ascii	"__uint16_t\000"
 .LASF7:
 	.ascii	"__uint32_t\000"
-.LASF26:
+.LASF24:
 	.ascii	"D:\\ITDev\\Projects\\EEE2039DPracs\\Prac 8\000"
-.LASF27:
+.LASF25:
 	.ascii	"main\000"
 .LASF11:
 	.ascii	"unsigned int\000"
 .LASF10:
 	.ascii	"long long unsigned int\000"
-.LASF28:
+.LASF26:
 	.ascii	"initLEDs\000"
 .LASF16:
 	.ascii	"sizetype\000"
 .LASF9:
 	.ascii	"long long int\000"
-.LASF25:
+.LASF23:
 	.ascii	"main.c\000"
 .LASF2:
 	.ascii	"short int\000"
-.LASF22:
-	.ascii	"RCC_AHBENR_IOPBEN\000"
 .LASF13:
 	.ascii	"uint16_t\000"
 .LASF18:
