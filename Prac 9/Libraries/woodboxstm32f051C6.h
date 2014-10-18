@@ -17,7 +17,19 @@
 
 #include <stdint.h>
 #include "stm32f0xx.h"
+#include "eeprom_lib.h"
 
-void delay(int length);
+enum POTSEL {POT0, POT1};
+
+void initLEDs();
+void initPB(void);
+void initADCPot(int POT);
+void delayms(uint32_t length); // Millisecond delay function
+void delaypointms(uint32_t length); // Point 1 millisecond delay function
+int16_t getPot(void);
+int8_t getPB(int button);
+void incrementLEDs(int8_t amount);
+
+
 
 #endif /* WOODBOXSTM32F051C6_H_ */

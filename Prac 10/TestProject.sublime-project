@@ -1,0 +1,19 @@
+{
+ "folders":
+ [
+ {
+ "path": "./",
+ "file_exclude_patterns": [
+ "*.o",
+ "*.elf",
+ "*.gitignore",
+ "*.gitmodules",
+ ],
+ "folder_exclude_patterns": [
+   ".git",
+   "Debug",
+   "Release"
+ ]
+ }
+ ]
+}
