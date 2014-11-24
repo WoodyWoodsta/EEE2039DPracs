@@ -5,6 +5,8 @@
   .global _start
   .word 0x20001FFF
   .word _start + 1
+  .word defaultHandler +1
+  .word hardFaultHandler +1
   
 _start: 
   LDR R0, RAM_START
@@ -51,8 +53,23 @@ copy_to_RAM_complete:
   LDR R1, [R5, #16]                @Load data from 0x20000010
   STR R1, [R0, #20]                @Write data
 
+  LDR R0, =0x0800004
+  STR R0, [R0, 0x10]
+
+  ADDS R7, R6, #8
+
 infinite_loop:
   B infinite_loop
+
+hardFaultHandler:
+  LDR R0, =0x48000400
+  LDR R1, =0b11100111
+  STR R1, [R0, 0x14]
+  B infinite_loop
+
+defaultHandler:
+  NOP
+
 
   .align
 RAM_START: .word 0x20000000
