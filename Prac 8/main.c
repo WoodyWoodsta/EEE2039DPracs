@@ -20,7 +20,7 @@ int main(void) {
   int8_t array[40] = {-4, 31, -51, 62, -45, 58, -99, 105, -6, 60, 37, 106, -106, -96, 97, 50, -116, -38, 38, -52, -64, -68, 75, 117, 111, 100, 116, 11, 46, -64, -82, -74, -3, 0, 44, 64, -6, 1, -119, 123};
   int8_t min = array[0];
   int8_t max = array[0];
-  
+
   // Run the find_min_ax function
   find_min_max(&array[0], sizeof(array), &max, &min);
   initLEDs();
